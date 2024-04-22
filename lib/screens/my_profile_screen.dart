@@ -3,6 +3,7 @@ import 'package:athlosight/screens/full_screen_myprofile.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 import 'package:intl/intl.dart';
@@ -25,14 +26,54 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   int _followersCount = 0;
   int _followingCount = 0;
   Map<String, ChewieController> chewieControllers = {};
+   NativeAd? _nativeAd;
+  bool _nativeAdIsLoaded = false;
+
+
+ // Add the following line
+  final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
   
 
   @override
   void initState() {
     super.initState();
     _getCurrentUserData();
+            _loadAd();
+  }
+ /// Loads a native ad.
+  void _loadAd() {
+    setState(() {
+      _nativeAdIsLoaded = false;
+    });
+
+    _nativeAd = NativeAd(
+        adUnitId: _adUnitId,
+        factoryId: 'adFactoryExample',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            // ignore: avoid_print
+            print('$NativeAd loaded.');
+            setState(() {
+              _nativeAdIsLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            // ignore: avoid_print
+            print('$NativeAd failedToLoad: $error');
+            ad.dispose();
+          },
+          onAdClicked: (ad) {},
+          onAdImpression: (ad) {},
+          onAdClosed: (ad) {},
+          onAdOpened: (ad) {},
+          onAdWillDismissScreen: (ad) {},
+          onPaidEvent: (ad, valueMicros, precision, currencyCode) {},
+        ),
+        request: const AdRequest(),
+    )..load();
   }
 
+  
   Future<void> _getCurrentUserData() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -91,6 +132,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   @override
   void dispose() {
+                _nativeAd?.dispose(); // Dispose of the native ad
     final List<ChewieController> controllerValues =
         chewieControllers.values.toList();
     for (final controller in controllerValues) {
@@ -261,30 +303,36 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfileScreen(
-                        profileImageUrl: profileImageUrl!,
-                        username: username!,
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('Edit Profile'),
-              ),
+             ElevatedButton(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProfileScreen(
+          profileImageUrl: profileImageUrl ?? '', // Default value is an empty string
+          username: username ?? '', // Default value is an empty string
+          fullName: fullName ?? '', // Default value is an empty string
+          currentTeam: currentTeam ?? '', // Default value is an empty string
+          playingCareer: playingCareer ?? '', // Default value is an empty string
+          styleOfPlay: styleOfPlay ?? '', // Default value is an empty string
+        ),
+      ),
+    );
+  },
+                  child: const Text('Edit Profile'),
+
+),
+
               const SizedBox(height: 16),
               Row(
                 children: [
                   Text(
-                    'Followers: $_followersCount',
+                    'Fanbase: $_followersCount',
                     style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(width: 16),
                   Text(
-                    'Following: $_followingCount',
+                    'Fanning: $_followingCount',
                     style: const TextStyle(fontSize: 16),
                   ),
                 ],
@@ -303,138 +351,153 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     final posts = snapshot.data!.docs;
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: posts.length,
-                      itemBuilder: (context, index) {
-                        final post =
-                            posts[index].data() as Map<String, dynamic>;
-                        final caption = post['caption'] as String? ?? '';
-                        final videoUrl = post['videoUrl'] as String? ?? '';
-                        final timestampStr = post['timestamp'] as String;
-                        final timestampMillis = int.tryParse(timestampStr) ?? 0;
-                        final timestamp = DateTime.fromMillisecondsSinceEpoch(
-                            timestampMillis);
-                        final formattedTimestamp =
-                            DateFormat.yMMMMd().add_jm().format(timestamp);
-                        final isLiked = post['isLiked'] ?? false;
-                        final likesCount = post['likesCount'] ?? 0;
 
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: Chewie(
-                                controller: getChewieController(videoUrl),
-                              ),
-                            ),
-                            ListTile(
-                              title: Text(caption),
-                              subtitle: Text(formattedTimestamp),
-                              onTap: () {
-                                // Handle post tap
-                                // You can navigate to a detailed post screen or perform any action you want
-                              },
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        // Handle like functionality
-                                        _toggleLike(posts[index].id, isLiked);
-                                      },
-                                      icon: Icon(
-                                        isLiked
-                                            ? Icons.favorite
-                                            : Icons.favorite_border,
-                                        color: isLiked
-                                            ? Colors.deepPurpleAccent
-                                            : null,
-                                      ),
-                                    ),
-                                    Column(
-                                      children: [
-                                        Text(
-                                          '$likesCount',
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
-                                        const Text(
-                                          'Likes',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => CommentScreen(
-                                              postId: posts[index].id,
-                                              currentUsername: username!,
-                                              profileImageUrl: profileImageUrl!,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      icon: const Icon(Icons.comment),
-                                    ),
-                                    FutureBuilder<QuerySnapshot>(
-                                      future: FirebaseFirestore.instance
-                                          .collection('posts')
-                                          .doc(posts[index].id)
-                                          .collection('comments')
-                                          .get(),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                                ConnectionState.waiting ||
-                                            !snapshot.hasData) {
-                                          return const SizedBox();
-                                        }
+                 return ListView.builder(
+  shrinkWrap: true,
+  physics: const NeverScrollableScrollPhysics(),
+  itemCount: posts.length,
+  itemBuilder: (context, index) {
+    final post = posts[index].data() as Map<String, dynamic>;
+    final caption = post['caption'] as String? ?? '';
+    final videoUrl = post['videoUrl'] as String? ?? '';
+    final timestampStr = post['timestamp'] as String;
+    final timestampMillis = int.tryParse(timestampStr) ?? 0;
+    final timestamp = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
+    final formattedTimestamp =
+        DateFormat.yMMMMd().add_jm().format(timestamp);
+    final isLiked = post['isLiked'] ?? false;
+    final likesCount = post['likesCount'] ?? 0;
 
-                                        final commentsCount =
-                                            snapshot.data!.docs.length;
-
-                                        return Text('$commentsCount');
-                                      },
-                                    ),
-                                    const SizedBox(width: 8),
-                                    IconButton(
-                                      onPressed: () async {
-                                        final String textToShare =
-                                            'Check out this post: $caption\n\nVideo: $videoUrl';
-
-                                        // Share the post using the flutter_share package
-                                        await FlutterShare.share(
-                                          title: 'Shared Post',
-                                          text: textToShare,
-                                          chooserTitle: 'Share',
-                                        );
-                                      },
-                                      icon: const Icon(Icons.share),
-                                    ),
-                                    const Text('Share'),
-                                  ],
-                                ),
-                                IconButton(
-                                  onPressed: () => _deletePost(posts[index].id),
-                                  icon: Icon(Icons.delete_rounded),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
+    // Build the post widget
+    Widget postWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Chewie(
+            controller: getChewieController(videoUrl),
+          ),
+        ),
+        ListTile(
+          title: Text(caption),
+          subtitle: Text(formattedTimestamp),
+          onTap: () {
+            // Handle post tap
+            // You can navigate to a detailed post screen or perform any action you want
+          },
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    // Handle like functionality
+                    _toggleLike(posts[index].id, isLiked);
+                  },
+                  icon: Icon(
+                    isLiked ? Icons.favorite : Icons.favorite_border,
+                    color: isLiked ? Colors.deepPurpleAccent : null,
+                  ),
+                ),
+                Column(
+                  children: [
+                    Text(
+                      '$likesCount',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const Text(
+                      'Likes',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CommentScreen(
+                          postId: posts[index].id,
+                          currentUsername: username!,
+                          profileImageUrl: profileImageUrl!,
+                        ),
+                      ),
                     );
+                  },
+                  icon: const Icon(Icons.comment),
+                ),
+                FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('posts')
+                      .doc(posts[index].id)
+                      .collection('comments')
+                      .get(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState ==
+                            ConnectionState.waiting ||
+                        !snapshot.hasData) {
+                      return const SizedBox();
+                    }
+
+                    final commentsCount = snapshot.data!.docs.length;
+
+                    return Text('$commentsCount');
+                  },
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () async {
+                    final String textToShare =
+                        'Check out this post: $caption\n\nVideo: $videoUrl';
+
+                    // Share the post using the flutter_share package
+                    await FlutterShare.share(
+                      title: 'Shared Post',
+                      text: textToShare,
+                      chooserTitle: 'Share',
+                    );
+                  },
+                  icon: const Icon(Icons.share),
+                ),
+                const Text('Share'),
+              ],
+            ),
+            IconButton(
+              onPressed: () => _deletePost(posts[index].id),
+              icon: Icon(Icons.delete_rounded),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    if (index == 0 && _nativeAdIsLoaded && _nativeAd != null) {
+      // If it's the first post, insert the native ad
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          postWidget, // Post widget
+          SizedBox(
+            height: 300, // Adjust the height as needed
+            width: MediaQuery.of(context).size.width,
+            child: AdWidget(ad: _nativeAd!), // Native ad widget
+          ),
+        ],
+      );
+    } else {
+      // Otherwise, just return the post widget
+      return postWidget;
+    }
+  },
+);
+
+
                   }
                   return const SizedBox(); // Return an empty container if no data
                 },

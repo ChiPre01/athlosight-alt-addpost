@@ -1,10 +1,12 @@
-import 'package:athlosight/screens/notifications_screen.dart';
+import 'package:athlosight/chat/chat_home.dart';
 import 'package:athlosight/screens/sign_up_screen.dart';
+import 'package:athlosight/screens/trial_info_screen.dart';
 import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_share/flutter_share.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logger/logger.dart';
 import 'package:video_player/video_player.dart';
 import 'package:intl/intl.dart';
@@ -40,10 +42,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
           icon: Icon(Icons.add),
           label: 'Add Post',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.message),
-          label: 'Chat List',
-        ),
+      
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'My Profile',
@@ -90,6 +89,12 @@ class _FollowingPostScreenState extends State<FollowingPostScreen> {
   String? filterLevel;
   String? filterRole;
     String? filterAthleteGender;
+     NativeAd? _nativeAd;
+  bool _nativeAdIsLoaded = false;
+
+
+ // Add the following line
+  final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
 
   List<String> followingUserIds = [];
   int _currentIndex = 0;
@@ -100,6 +105,7 @@ class _FollowingPostScreenState extends State<FollowingPostScreen> {
     _scrollController.addListener(_scrollListener);
     _fetchUserData();
     currentUserId = FirebaseAuth.instance.currentUser?.uid;
+            _loadAd(); // Load the native ad
   }
 
   Future<void> _fetchUserData() async {
@@ -138,6 +144,7 @@ class _FollowingPostScreenState extends State<FollowingPostScreen> {
 
   @override
   void dispose() {
+            _nativeAd?.dispose(); // Dispose of the native ad
     final List<ChewieController> controllerValues = chewieControllers.values.toList();
     for (final controller in controllerValues) {
       controller.dispose();
@@ -203,6 +210,16 @@ Future<void> _signOut() async {
                         ],
                       ),
                     ),
+                     PopupMenuItem<String>(
+                value: 'trial_info',
+                child: Row(
+                  children: [
+                    Icon(Icons.info, color: Colors.deepPurple), // Trial Info icon
+                    const SizedBox(width: 8),
+                    Text('Trial Info'),
+                  ],
+                ),
+              ),
                   ],
                 );
 
@@ -220,7 +237,14 @@ Future<void> _signOut() async {
                   // You can navigate to the fanning page or perform any desired action
                                                       _fetchUserData();
 
-                }
+                }else if (selectedOption == 'trial_info') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TrialInfoScreen(),
+              ),
+            );
+          }
               },
               child: const Text(
                 '♥ ▼',
@@ -233,103 +257,65 @@ Future<void> _signOut() async {
         automaticallyImplyLeading: false,
          actions: [
           IconButton(
-  icon: Icon(Icons.notification_important_rounded, color: Colors.deepPurple),
+  icon: Icon(Icons.send, color: Colors.deepPurple),
   onPressed: () {
     // Navigate to the NotificationScreen when the notification icon is tapped
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => NotificationScreen(notifications: [], message: {},), // Pass the notifications list here
+        builder: (context) => ChatHome(currentUserUid: '',)
       ),
     );
   },
 ),
- TextButton(
-  onPressed: () async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return;
-
-    final otherUserId = '4d7PJvVf6RZCKxd0jxaa1TRgFLF2';
-
-   
-    // Navigate to the chat screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UserProfileScreen(userId: otherUserId),
-      ),
-    );
-  },
-  child: Column(
-    children: [
-      Text(
-        'chat',
-        style: TextStyle(color: Colors.deepPurple),
-      ),
-      Text(
-        'admin',
-        style: TextStyle(color: Colors.deepPurple),
-      ),
-    ],
-  ),
-),
-
-PopupMenuButton<String>(
+  PopupMenuButton<String>(
   onSelected: (value) async {
     // Handle the selected option
-    if (value == 'forum') {
-      // Handle forum option    
-    
-    } else if (value == 'sign out') {
+    if (value == 'sign out') {
       // Handle logout option
-            await _signOut();
-    } else if (value == 'admin_dashboard') {
-     // Handle admin dashboard option
-    }
+      await _signOut();
+    } else if (value == 'trial_setup') {
+          // Handle trial setup option
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TrialInfoScreen(),
+            ),
+          );
+        } 
   },
+
   itemBuilder: (context) => [
-    PopupMenuItem<String>(
-                      value: 'forum',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.group,
-                            color: Colors.deepPurple, // Deep purple color for the icon
-                          ),
-                          const SizedBox(width: 8),
-                          Text('forum'),
-                        ],
-                      ),
-                    ),
-      PopupMenuItem<String>(
-                      value: 'admin',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.admin_panel_settings,
-                            color: Colors.deepPurple, // Deep purple color for the icon
-                          ),
-                          const SizedBox(width: 8),
-                          Text('admin'),
-                        ],
-                      ),
-                    ),
      PopupMenuItem<String>(
-                      value: 'sign out',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.logout,
-                            color: Colors.deepPurple, // Deep purple color for the icon
-                          ),
-                          const SizedBox(width: 8),
-                          Text('sign out'),
-                        ],
-                      ),
-                    ),
+          value: 'trial_setup',
+          child: Row(
+            children: [
+              Icon(
+                Icons.info,
+                color: Colors.deepPurple,
+              ),
+              const SizedBox(width: 8),
+              Text('Trial Setup'),
+            ],
+          ),
+        ),
+    PopupMenuItem<String>(
+      value: 'sign out',
+      child: Row(
+        children: [
+          Icon(
+            Icons.logout,
+            color: Colors.deepPurple,
+          ),
+          const SizedBox(width: 8),
+          Text('sign out'),
+        ],
+      ),
+    ),
   ],
-  icon: Icon(Icons.more_outlined, color: Colors.deepPurple),
+  icon: Icon(Icons.more_vert, color: Colors.deepPurple),
 ),
+
   ],
       ),
       body: Column(
@@ -411,208 +397,250 @@ PopupMenuButton<String>(
 
                           }).toList();
 
-                          return ListView.builder(
-                            controller: _scrollController,
-                            itemCount: filteredPosts.length,
-                            itemBuilder: (context, index) {
-                              final post = filteredPosts[index].data() as Map<String, dynamic>;
-                              final postId = filteredPosts[index].id;
+return ListView.builder(
+  controller: _scrollController,
+  itemCount: filteredPosts.length + ((filteredPosts.length ~/ 3) + 1),
+  itemBuilder: (context, index) {
+    if (index != 0 && index % 4 == 0 && _nativeAdIsLoaded) {
+      // Index is a multiple of 6 (after the first item), return an ad widget
+      return Container(
+        height: 300,
+        width: MediaQuery.of(context).size.width,
+        child: AdWidget(ad: _nativeAd!),
+      );
+    } else {
+      // Calculate the adjusted post index for non-ad items
+      final adjustedPostIndex = index - ((index ~/ 4) + 1);
+      if (adjustedPostIndex >= 0 && adjustedPostIndex < filteredPosts.length) {
+        // Return a post widget
+        final postIndex = adjustedPostIndex;
+        final post = filteredPosts[postIndex].data() as Map<String, dynamic>;
+        final postId = filteredPosts[postIndex].id;
 
-                              if (deletedPostIds.contains(postId)) {
-                                return SizedBox();
-                              }
+        if (deletedPostIds.contains(postId)) {
+          return SizedBox();
+        }
 
-                              final user = usersList.firstWhere(
-                                (user) => user.userId == post['uid'],
-                                orElse: () => User(
-                                  profileImageUrl: '',
-                                  username: 'Unknown',
-                                  country: 'Unknown',
-                                  age: '',
-                                  userId: post['uid'],
-                                ),
-                              );
+        final user = usersList.firstWhere(
+          (user) => user.userId == post['uid'],
+          orElse: () => User(
+            profileImageUrl: '',
+            username: 'Unknown',
+            country: 'Unknown',
+            age: '',
+            userId: post['uid'],
+          ),
+        );
 
-                              final level = post['level'] ?? '';
-                              final role = post['role'] ?? '';
-                              final sport = post['sport'] ?? '';
-                              final caption = post['caption'] ?? '';
-                              final videoUrl = post['videoUrl'] ?? '';
-                              final timestampStr = post['timestamp'] as String;
-                              final athletegender = post['athletegender'] ?? '';
+        final level = post['level'] ?? '';
+        final role = post['role'] ?? '';
+        final sport = post['sport'] ?? '';
+        final caption = post['caption'] ?? '';
+        final videoUrl = post['videoUrl'] ?? '';
+        final timestampStr = post['timestamp'] as String;
+        final athletegender = post['athletegender'] ?? '';
 
-                              final chewieController = getChewieController(videoUrl);
+        final chewieController = getChewieController(videoUrl);
 
-                              final timestampMillis = int.tryParse(timestampStr) ?? 0;
-                              final timestamp = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
-                              final formattedTimestamp = DateFormat.yMMMMd().add_jm().format(timestamp);
+        final timestampMillis = int.tryParse(timestampStr) ?? 0;
+        final timestamp =
+            DateTime.fromMillisecondsSinceEpoch(timestampMillis);
+        final formattedTimestamp =
+            DateFormat.yMMMMd().add_jm().format(timestamp);
 
-                              final isLikedByCurrentUser = post['likes'] != null && post['likes'][currentUserId] == true;
+        final isLikedByCurrentUser = post['likes'] != null &&
+            post['likes'][currentUserId] == true;
 
-                              return Card(
-                                child: Column(
-                                  children: [
-                                    ListTile(
-                                      leading: CircleAvatar(
-                                        backgroundImage: NetworkImage(user.profileImageUrl),
-                                      ),
-                                      title: Text(user.username),
-                                      onTap: () {
-                                        if (user.userId == FirebaseAuth.instance.currentUser?.uid) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => MyProfileScreen(userProfileImageUrl: '',),
-                                            ),
-                                          );
-                                        } else {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => UserProfileScreen(userId: user.userId),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 4.0),
-                                            child: Text('${user.country}, $athletegender, ${user.age}'),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 4.0),
-                                            child: Text('Sport: $sport', style: const TextStyle(fontSize: 12)),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 4.0),
-                                            child: Text('Role: $role', style: const TextStyle(fontSize: 12)),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 4.0),
-                                            child: Text('Level: $level', style: const TextStyle(fontSize: 12)),
-                                          ),
-                                           Text(formattedTimestamp),
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(caption),
-                                    ),
-                                    AspectRatio(
-                                      aspectRatio: 10 / 16,
-                                      child: Chewie(
-                                        controller: chewieController,
-                                      ),
-                                    ),
-                                    Builder(
-                                      builder: (context) {
-                                        final likesCount = post['likesCount'] ?? 0;
+        return Card(
+          child: Column(
+            children: [
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(user.profileImageUrl),
+                ),
+                title: Text(user.username),
+                onTap: () {
+                  if (user.userId ==
+                      FirebaseAuth.instance.currentUser?.uid) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            MyProfileScreen(userProfileImageUrl: ''),
+                      ),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UserProfileScreen(
+                          userId: user.userId,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Text(
+                          '${user.country}, $athletegender, ${user.age}'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Text('Sport: $sport',
+                          style: const TextStyle(fontSize: 12)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Text('Role: $role',
+                          style: const TextStyle(fontSize: 12)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Text('Level: $level',
+                          style: const TextStyle(fontSize: 12)),
+                    ),
+                    Text(formattedTimestamp),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(caption),
+              ),
+              AspectRatio(
+                aspectRatio: 10 / 16,
+                child: Chewie(
+                  controller: chewieController,
+                ),
+              ),
+              Builder(
+                builder: (context) {
+                  final likesCount = post['likesCount'] ?? 0;
 
-                                        return Column(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                IconButton(
-                                                  onPressed: () {
-                                                    _toggleLike(postId, isLikedByCurrentUser);
-                                                  },
-                                                  icon: Icon(
-                                                    isLikedByCurrentUser ? Icons.favorite : Icons.favorite_border,
-                                                    color: isLikedByCurrentUser ? Colors.deepPurpleAccent : null,
-                                                  ),
-                                                ),
-                                                IconButton(
-                                                  onPressed: () {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) => CommentScreen(
-                                                          postId: postId,
-                                                          currentUsername: user.username,
-                                                          profileImageUrl: user.profileImageUrl,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                                  icon: const Icon(Icons.comment),
-                                                ),
-                                                IconButton(
-                                                  onPressed: () async {
-                                                    final String textToShare = 'Check out this post: $caption\n\nVideo: $videoUrl';
-
-                                                    await FlutterShare.share(
-                                                      title: 'Shared Post',
-                                                      text: textToShare,
-                                                      chooserTitle: 'Share',
-                                                    );
-                                                  },
-                                                  icon: const Icon(Icons.share),
-                                                ),
-                                                IconButton(
-                                                  onPressed: () {
-                                                    if (!deletedPostIds.contains(postId)) {
-                                                      _deletePost(postId, context);
-                                                    }
-                                                  },
-                                                  icon: Icon(Icons.delete),
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                      '$likesCount',
-                                                      style: const TextStyle(fontSize: 16),
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    const Text(
-                                                      'Likes',
-                                                      style: TextStyle(fontSize: 12),
-                                                    ),
-                                                  ],
-                                                ),
-                                                FutureBuilder<QuerySnapshot>(
-                                                  future: _firestore.collection('posts').doc(postId).collection('comments').get(),
-                                                  builder: (context, snapshot) {
-                                                    if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
-                                                      return const SizedBox();
-                                                    }
-
-                                                    final commentsCount = snapshot.data!.docs.length;
-
-                                                    return Row(
-                                                      children: [
-                                                        Text(
-                                                          '$commentsCount',
-                                                          style: const TextStyle(fontSize: 16),
-                                                        ),
-                                                        const SizedBox(width: 4),
-                                                        const Text(
-                                                          'Comments',
-                                                          style: TextStyle(fontSize: 12),
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ],
+                  return Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              _toggleLike(postId, isLikedByCurrentUser);
+                            },
+                            icon: Icon(
+                              isLikedByCurrentUser
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isLikedByCurrentUser
+                                  ? Colors.deepPurpleAccent
+                                  : null,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CommentScreen(
+                                    postId: postId,
+                                    currentUsername: user.username,
+                                    profileImageUrl: user.profileImageUrl,
+                                  ),
                                 ),
                               );
                             },
-                          );
+                            icon: const Icon(Icons.comment),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              final String textToShare =
+                                  'Check out this post: $caption\n\nVideo: $videoUrl';
+
+                              await FlutterShare.share(
+                                title: 'Shared Post',
+                                text: textToShare,
+                                chooserTitle: 'Share',
+                              );
+                            },
+                            icon: const Icon(Icons.share),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              if (!deletedPostIds.contains(postId)) {
+                                _deletePost(postId, context);
+                              }
+                            },
+                            icon: Icon(Icons.delete),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                '$likesCount',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              const SizedBox(width: 4),
+                              const Text(
+                                'Likes',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          FutureBuilder<QuerySnapshot>(
+                            future: _firestore
+                                .collection('posts')
+                                .doc(postId)
+                                .collection('comments')
+                                .get(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                      ConnectionState.waiting ||
+                                  !snapshot.hasData) {
+                                return const SizedBox();
+                              }
+
+                              final commentsCount =
+                                  snapshot.data!.docs.length;
+
+                              return Row(
+                                children: [
+                                  Text(
+                                    '$commentsCount',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Text(
+                                    'Comments',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      } else {
+        return SizedBox();
+      }
+    }
+  },
+);
+
+
                         },
                       ),
           ),
@@ -677,7 +705,38 @@ PopupMenuButton<String>(
     );
   }
 
+ /// Loads a native ad.
+  void _loadAd() {
+    setState(() {
+      _nativeAdIsLoaded = false;
+    });
 
+    _nativeAd = NativeAd(
+        adUnitId: _adUnitId,
+        factoryId: 'adFactoryExample',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            // ignore: avoid_print
+            print('$NativeAd loaded.');
+            setState(() {
+              _nativeAdIsLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            // ignore: avoid_print
+            print('$NativeAd failedToLoad: $error');
+            ad.dispose();
+          },
+          onAdClicked: (ad) {},
+          onAdImpression: (ad) {},
+          onAdClosed: (ad) {},
+          onAdOpened: (ad) {},
+          onAdWillDismissScreen: (ad) {},
+          onPaidEvent: (ad, valueMicros, precision, currencyCode) {},
+        ),
+        request: const AdRequest(),
+    )..load();
+  }
 
   ChewieController getChewieController(String videoUrl) {
     if (!chewieControllers.containsKey(videoUrl) || chewieControllers[videoUrl] == null) {

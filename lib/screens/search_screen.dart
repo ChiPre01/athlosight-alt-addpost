@@ -66,7 +66,7 @@ void _performSearch(String searchTerm) async {
       ),
       const SizedBox(width: 8), // Add spacing between the image and title
       Text(
-        'User Search',
+        'Search',
         style: TextStyle(
           color: Colors.deepPurple, // Set the text color to deep purple
         ),

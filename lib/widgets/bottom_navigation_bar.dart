@@ -35,16 +35,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
           icon: Icon(Icons.add),
           label: 'Create Content',
         ),
-        BottomNavigationBarItem(
-          icon: badges.Badge(
-            badgeContent: Text(
-              unreadMessageCount > 0 ? unreadMessageCount.toString() : '',
-              style: TextStyle(color: Colors.white),
-            ),
-            child: Icon(Icons.mail),
-          ),
-          label: 'Messages',
-        ),
+      
         BottomNavigationBarItem(
           icon: CircleAvatar(
             backgroundImage: NetworkImage(profileImageUrl),

@@ -12,10 +12,19 @@ import 'package:permission_handler/permission_handler.dart';
 class EditProfileScreen extends StatefulWidget {
   final String profileImageUrl;
   final String username;
+    final String fullName; // Declare fullName property
+    final String currentTeam;
+    final String playingCareer;
+    final String styleOfPlay;
+  
 
   const EditProfileScreen({
     required this.profileImageUrl,
-    required this.username, 
+    required this.username,
+     required this.fullName,
+      required this.currentTeam, 
+      required this.playingCareer, 
+      required this.styleOfPlay,               
   });
 
   @override
@@ -55,11 +64,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
          'Weight Lifter(Weight Lifting)', 'Referee',];
   final List<String> _genders = ['Male','Female',];
 
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _currentTeamController = TextEditingController();
-  final TextEditingController _playingCareerController = TextEditingController();
-  final TextEditingController _styleOfPlayController = TextEditingController();
+  late TextEditingController _usernameController = TextEditingController();
+  late TextEditingController _fullNameController = TextEditingController();
+  late TextEditingController _currentTeamController = TextEditingController();
+  late TextEditingController _playingCareerController = TextEditingController();
+  late TextEditingController _styleOfPlayController = TextEditingController();
+
 
   File? _profileImage;
   final ImagePicker _imagePicker = ImagePicker();
@@ -67,7 +77,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _usernameController.text = widget.username;
+    _usernameController = TextEditingController(text: widget.username);
+    _fullNameController = TextEditingController(text: widget.fullName);
+    _currentTeamController = TextEditingController(text: widget.currentTeam);
+    _playingCareerController = TextEditingController(text: widget.playingCareer);
+    _styleOfPlayController = TextEditingController(text: widget.styleOfPlay);
   }
 
   @override
@@ -79,6 +93,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _styleOfPlayController.dispose();
     super.dispose();
   }
+
+@override
+  void didUpdateWidget(covariant EditProfileScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _usernameController.text = widget.username;
+    _fullNameController.text = widget.fullName;
+    _currentTeamController.text = widget.currentTeam;
+    _playingCareerController.text = widget.playingCareer;
+    _styleOfPlayController.text = widget.styleOfPlay;
+  }
+
 Future<void> _pickProfileImage() async {
   final pickedImage = await showModalBottomSheet(
     context: context,
@@ -339,10 +364,16 @@ Future<void> _updateLocation(String uid) async {
               ),
             ),
             const SizedBox(height: 32.0),
-            ElevatedButton(
-              onPressed: _saveProfile,
-              child: const Text('Update Profile'),
-            ),
+           ElevatedButton(
+  onPressed: () {
+    _saveProfile(); // Call _saveProfile directly
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Updated! Changes will be visible when users check your profile')), // Show a temporary message while processing
+    );
+  },
+  child: const Text('Update Profile'),
+),
+
             if (_currentCountry != null)
               ...[
                 const SizedBox(height: 10),

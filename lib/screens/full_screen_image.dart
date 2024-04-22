@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class FullScreenImageDialog extends StatelessWidget {
   final String imageUrl;
 
-  const FullScreenImageDialog({super.key, required this.imageUrl,});
+  const FullScreenImageDialog({super.key, required this.imageUrl, });
 
   @override
   Widget build(BuildContext context) {

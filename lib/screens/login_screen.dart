@@ -1,11 +1,13 @@
 import 'package:athlosight/policies_with_dialogs/terms_and_privacy.dart';
 import 'package:athlosight/screens/register_screen.dart';
+import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
 import 'package:athlosight/screens/sign_up_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -33,6 +35,10 @@ class LoginScreenState extends State<LoginScreen> {
         email: email,
         password: password,
       );
+
+ // Set isFirstTimeUser flag to false
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isFirstTimeUser', false);
 
       // Navigate to the home screen after successful login
       Navigator.pushReplacement(
@@ -141,47 +147,49 @@ class LoginScreenState extends State<LoginScreen> {
     }
   }
   
-Future<void> signInWithGoogle() async {
+  Future<void> signInWithGoogle() async {
   try {
-    // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-    // Check if the user cancelled the sign-in process
     if (googleUser == null) {
       return;
     }
 
-    // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth = await googleUser.authentication;
 
-    // Create a new credential
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
 
-    // Sign in to Firebase with the Google credential
     final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
-    // Use the userCredential for further processing if needed
-    // For example, you can get the user's email and UID like this:
-    final String email = userCredential.user?.email ?? '';
     final String uid = userCredential.user?.uid ?? '';
+    
 
-    // Save user data to Firestore
-    await saveUserData(email, uid);
+    // Check if the user is signing in for the first time
+    final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    if (userSnapshot.exists) {
+      // User is already registered, navigate to the home screen
+      // Replace 'HomeScreen' with the actual name of your home screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => VisibleScreen(initialIndex: 0, userProfileImageUrl: '',)),
+      );
+    } else {
+      // User is signing up for the first time, navigate to the register screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => RegisterScreen()),
+      );
+    }
+      // Set isFirstTimeUser flag to false
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isFirstTimeUser', false);
 
-    // The user is now signed in, you can handle the sign-in success here
-    // For example, navigate to the next screen or save user data to Firestore.
-    // In this case, you can call the saveUserData method as before.
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (BuildContext context) => const RegisterScreen()),
-    );
   } catch (e) {
     _logger.i('Error occurred during Google Sign-In: $e');
-    showErrorMessage('An error occurred during Google Sign-In.');
+    showErrorMessage('$e');
   }
 }
 
@@ -297,10 +305,7 @@ Future<void> signInWithGoogle() async {
             const SizedBox(
               height: 12,
             ),
-            Flexible(
-              flex: 2,
-              child: Container(),
-            ),
+          
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

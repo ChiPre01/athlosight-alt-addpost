@@ -1,4 +1,3 @@
-import 'package:athlosight/screens/chat_screen.dart';
 import 'package:athlosight/screens/comment_screen.dart';
 import 'package:athlosight/screens/full_screen_myprofile.dart';
 import 'package:athlosight/widgets/video_player_widget.dart';
@@ -6,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_share/flutter_share.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -22,6 +22,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isFollowing = false;
   int _followersCount = 0;
   int _followingCount = 0;
+   NativeAd? _nativeAd;
+  bool _nativeAdIsLoaded = false;
+
+
+ // Add the following line
+  final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
 
   @override
   void initState() {
@@ -30,7 +36,41 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     _checkIfFollowing();
     _fetchFollowersCount();
     _fetchFollowingCount();
+        _loadAd();
   }
+    /// Loads a native ad.
+  void _loadAd() {
+    setState(() {
+      _nativeAdIsLoaded = false;
+    });
+
+    _nativeAd = NativeAd(
+        adUnitId: _adUnitId,
+        factoryId: 'adFactoryExample',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            // ignore: avoid_print
+            print('$NativeAd loaded.');
+            setState(() {
+              _nativeAdIsLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            // ignore: avoid_print
+            print('$NativeAd failedToLoad: $error');
+            ad.dispose();
+          },
+          onAdClicked: (ad) {},
+          onAdImpression: (ad) {},
+          onAdClosed: (ad) {},
+          onAdOpened: (ad) {},
+          onAdWillDismissScreen: (ad) {},
+          onPaidEvent: (ad, valueMicros, precision, currencyCode) {},
+        ),
+        request: const AdRequest(),
+    )..load();
+  }
+
 
   Future<void> _checkIfFollowing() async {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -130,8 +170,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       _followingCount = followingSnapshot.size;
     });
   }
-
-  
+    
 void _saveChatToFirestore(String otherUserId, String otherUsername, String otherProfileImageUrl) {
   final currentUser = FirebaseAuth.instance.currentUser;
   if (currentUser == null) return;
@@ -166,6 +205,12 @@ void _saveChatToFirestore(String otherUserId, String otherUsername, String other
 }
 
   @override
+  void dispose() {
+    _nativeAd?.dispose();
+    super.dispose();
+  }
+  
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -194,6 +239,8 @@ void _saveChatToFirestore(String otherUserId, String otherUsername, String other
     final currentTeam = userData?['currentTeam'] ?? '';
     final playingCareer = userData?['playingCareer'] ?? '';
     final styleOfPlay = userData!['styleOfPlay'] ?? '';
+
+     
             
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -268,12 +315,12 @@ void _saveChatToFirestore(String otherUserId, String otherUsername, String other
                       Row(
                         children: [
                           Text(
-                            'Followers: $_followersCount',
+                            'Fanbase: $_followersCount',
                             style: const TextStyle(fontSize: 16),
                           ),
                           const SizedBox(width: 16),
                           Text(
-                            'Following: $_followingCount',
+                            'Fanning: $_followingCount',
                             style: const TextStyle(fontSize: 16),
                           ),
                         ],
@@ -287,24 +334,9 @@ void _saveChatToFirestore(String otherUserId, String otherUsername, String other
               children: [
                 ElevatedButton(
                   onPressed: _toggleFollow,
-                  child: Text(_isFollowing ? 'Unfollow' : 'Follow'),
+                  child: Text(_isFollowing ? 'Unfan -' : 'Fan +'),
                 ),
-                SizedBox(width: 4,),
-                 ElevatedButton(
-              onPressed: () {
-                 // Save chat details to Firestore and navigate to the messaging screen
-    _saveChatToFirestore(widget.userId, username, profileImageUrl);
-                // Navigate to the messaging screen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatScreen(userId: widget.userId,  
-),
-                  ),
-                );
-              },
-              child: const Text('Message'),
-            ),
+              
               ],
             ),
             const Text(
@@ -320,139 +352,162 @@ void _saveChatToFirestore(String otherUserId, String otherUsername, String other
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final posts = snapshot.data!.docs;
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: posts.length,
-                    itemBuilder: (context, index) {
-                      final post = posts[index].data() as Map<String, dynamic>;
-                      final caption = post['caption'] as String? ?? '';
-                      final videoUrl = post['videoUrl'] as String? ?? '';
-                      final timestampStr = post['timestamp'] as String;
-                      final timestampMillis = int.tryParse(timestampStr) ?? 0;
-                      final timestamp =
-                          DateTime.fromMillisecondsSinceEpoch(timestampMillis);
-                      final formattedTimestamp =
-                          DateFormat.yMMMMd().add_jm().format(timestamp);
-                      final isLiked = post['isLiked'] ?? false;
-                      final likesCount = post['likesCount'] ?? 0;
+                 
+              return ListView.builder(
+  shrinkWrap: true,
+  physics: const NeverScrollableScrollPhysics(),
+  itemCount: posts.length,
+  itemBuilder: (context, index) {
+    final post = posts[index].data() as Map<String, dynamic>;
+    final caption = post['caption'] as String? ?? '';
+    final videoUrl = post['videoUrl'] as String? ?? '';
+    final timestampStr = post['timestamp'] as String;
+    final timestampMillis = int.tryParse(timestampStr) ?? 0;
+    final timestamp =
+        DateTime.fromMillisecondsSinceEpoch(timestampMillis);
+    final formattedTimestamp =
+        DateFormat.yMMMMd().add_jm().format(timestamp);
+    final isLiked = post['isLiked'] ?? false;
+    final likesCount = post['likesCount'] ?? 0;
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              caption,
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                          ),
-                          AspectRatio(
-                            aspectRatio: 16 / 9,
-                            child: VideoPlayerWidget(videoUrl: videoUrl),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              formattedTimestamp,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          ),
+    // Build the post widget
+    Widget postWidget = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            caption,
+            style: const TextStyle(fontSize: 18),
+          ),
+        ),
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: VideoPlayerWidget(videoUrl: videoUrl),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            formattedTimestamp,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              onPressed: () {
+                // Handle like functionality
+                _toggleLike(posts[index].id, isLiked);
+              },
+              icon: Icon(
+                isLiked ? Icons.favorite : Icons.favorite_border,
+                color: isLiked ? Colors.deepPurpleAccent : null,
+              ),
+            ),
+            Column(
+              children: [
+                Text(
+                  '$likesCount',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const Text(
+                  'Likes',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+            IconButton(
+              onPressed: () {
+                // Handle comment functionality
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CommentScreen(
+                      postId: posts[index].id,
+                      currentUsername: '',
+                      profileImageUrl: '',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.comment),
+            ),
+            FutureBuilder<QuerySnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('posts')
+                  .doc(posts[index].id)
+                  .collection('comments')
+                  .get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState ==
+                        ConnectionState.waiting ||
+                    !snapshot.hasData) {
+                  return const SizedBox();
+                }
 
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  // Handle like functionality
-                                  _toggleLike(posts[index].id, isLiked);
-                                },
-                                icon: Icon(
-                                  isLiked ? Icons.favorite : Icons.favorite_border,
-                                  color: isLiked ? Colors.deepPurpleAccent : null,
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  Text(
-                                    '$likesCount',
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                  const Text(
-                                    'Likes',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  // Handle comment functionality
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => CommentScreen(
-                                        postId: posts[index].id,
-                                        currentUsername: '',
-                                        profileImageUrl: '',
-                                      ),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.comment),
-                              ),
-                              FutureBuilder<QuerySnapshot>(
-                                future: FirebaseFirestore.instance
-                                    .collection('posts')
-                                    .doc(posts[index].id)
-                                    .collection('comments')
-                                    .get(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                          ConnectionState.waiting ||
-                                      !snapshot.hasData) {
-                                    return const SizedBox();
-                                  }
+                final commentsCount =
+                    snapshot.data!.docs.length;
 
-                                  final commentsCount =
-                                      snapshot.data!.docs.length;
+                return Column(
+                  children: [
+                    Text(
+                      '$commentsCount',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    const Text(
+                      'Comments',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
+                );
+              },
+            ),
+            IconButton(
+              onPressed: () async {
+                // Handle share functionality
+                final String textToShare =
+                    'Check out this post: $caption\n\nVideo: $videoUrl';
 
-                                  return Column(
-                                    children: [
-                                      Text(
-                                        '$commentsCount',
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                      const Text(
-                                        'Comments',
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                onPressed: () async {
-                                  // Handle share functionality
-                                  final String textToShare =
-                                      'Check out this post: $caption\n\nVideo: $videoUrl';
+                // Share the post using the flutter_share package
+                await FlutterShare.share(
+                  title: 'Shared Post',
+                  text: textToShare,
+                  chooserTitle: 'Share',
+                );
+              },
+              icon: const Icon(Icons.share),
+            ),
+          ],
+        ),
+        const Divider(),
+      ],
+    );
 
-                                  // Share the post using the flutter_share package
-                                  await FlutterShare.share(
-                                    title: 'Shared Post',
-                                    text: textToShare,
-                                    chooserTitle: 'Share',
-                                  );
-                                },
-                                icon: const Icon(Icons.share),
-                              ),
-                            ],
-                          ),
+    if (index == 0 && _nativeAdIsLoaded && _nativeAd != null) {
+      // If it's the first post, insert the native ad
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          postWidget, // Post widget
+          SizedBox(
+            height: 300, // Adjust the height as needed
+            width: MediaQuery.of(context).size.width,
+            child: AdWidget(ad: _nativeAd!), // Native ad widget
+          ),
+        ],
+      );
+    } else {
+      // Otherwise, just return the post widget
+      return postWidget;
+    }
+  },
+);
 
-                          const Divider(),
-                        ],
-                      );
-                    },
-                  );
+
+
+
+
                 }
                 return const SizedBox(); // Return an empty container if no data
               },

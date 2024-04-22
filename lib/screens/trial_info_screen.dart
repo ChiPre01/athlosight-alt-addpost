@@ -1,26 +1,21 @@
-import 'package:athlosight/chat/chat_home.dart';
-import 'package:athlosight/notifications/notification_screen.dart';
-import 'package:athlosight/screens/following_post_screen.dart';
-import 'package:athlosight/screens/login_screen.dart';
-import 'package:athlosight/screens/trial_info_screen.dart';
+import 'package:athlosight/screens/add_trial_post_screen.dart';
 import 'package:athlosight/screens/user_profile_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logger/logger.dart';
-import 'package:video_player/video_player.dart';
 import 'package:intl/intl.dart';
-import 'package:chewie/chewie.dart';
 import 'package:athlosight/screens/comment_screen.dart';
 import 'package:athlosight/screens/my_profile_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class TrialInfoScreen extends StatefulWidget {
+  const TrialInfoScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<TrialInfoScreen> createState() => _TrialInfoScreenState();
 }
 
 class User {
@@ -39,11 +34,10 @@ class User {
   });
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _TrialInfoScreenState extends State<TrialInfoScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
     List<DocumentSnapshot> filteredPosts = [];
   final ScrollController _scrollController = ScrollController();
-  Map<String, ChewieController> chewieControllers = {};
   final logger = Logger();
   final Set<String> deletedPostIds = {};
   List<User> usersList = [];
@@ -56,21 +50,37 @@ class _HomeScreenState extends State<HomeScreen> {
   String? filterAthleteGender;
     NativeAd? _nativeAd;
   bool _nativeAdIsLoaded = false;
+   // Add this variable to track whether there's more data to load
+  bool _hasMore = true;
+
+  // Add this variable to track whether data is currently being loaded
+  bool _isLoading = false;
+
+  // Add this variable to track the last document snapshot
+  DocumentSnapshot? _lastDocument;
 
 
  // Add the following line
   final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
 
-
-
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
         _fetchPosts();
     _fetchUserData();
     currentUserId = FirebaseAuth.instance.currentUser?.uid;
         _loadAd(); // Load the native ad
+          // Add a listener to the scroll controller
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        // Reached the bottom of the list
+        if (_hasMore && !_isLoading) {
+          // Fetch more data
+          _fetchPosts();
+        }
+      }
+    });
   }
   
 
@@ -101,52 +111,68 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
-  @override
+ @override
   void dispose() {
-        _nativeAd?.dispose(); // Dispose of the native ad
-    final List<ChewieController> controllerValues =
-        chewieControllers.values.toList();
-    for (final controller in controllerValues) {
-      controller.dispose();
-    }
-    _scrollController.removeListener(_scrollListener);
+    _nativeAd?.dispose();
     super.dispose();
   }
-  // Add the signOut method
-Future<void> _signOut() async {
+  
+  Future<void> _fetchPosts() async {
+  if (_isLoading) {
+    return;
+  }
+
   try {
-    await FirebaseAuth.instance.signOut();
-    print('User signed out successfully');
-    // Navigate to the SignUpScreen after signing out
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(), // Replace SignUpScreen with your actual sign-up screen widget
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+    });
+
+    QuerySnapshot<Map<String, dynamic>> postsSnapshot;
+    if (_lastDocument == null) {
+      // Initial fetch
+      postsSnapshot = await _firestore.collection('posts').get();
+    } else {
+      // Fetch next batch of posts
+      postsSnapshot = await _firestore
+          .collection('posts')
+          .startAfterDocument(_lastDocument!)
+          .get();
+    }
+
+    if (postsSnapshot.docs.isNotEmpty) {
+      _lastDocument = postsSnapshot.docs.last;
+      filteredPosts.addAll(postsSnapshot.docs);
+
+      // Check if there's more data to load
+      if (postsSnapshot.docs.length < 10) {
+        _hasMore = false;
+      }
+    } else {
+      _hasMore = false;
+    }
   } catch (e) {
-    print('Error signing out: $e');
+    print('Error fetching posts data: $e');
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
 }
- Future<void> _fetchPosts() async {
-    try {
-      final postsSnapshot = await _firestore.collection('posts').get();
-      filteredPosts = postsSnapshot.docs.where((post) {
-        final postData = post.data();
-        return postData['videoUrl'] != null;
-      }).toList();
-    } catch (e) {
-      print('Error fetching posts data: $e');
-    }
-    setState(() {});
-  }
+
 
   @override
    Widget build(BuildContext context) {
     return Scaffold(
-      appBar:AppBar(
+        appBar:AppBar(
+  automaticallyImplyLeading: false, // Remove the default back arrow
   title: Row(
     children: [
+      IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.deepPurple), // Back icon
+        onPressed: () {
+          Navigator.pop(context); // Navigate to the previous page
+        },
+      ),
       ClipRRect(
         borderRadius: BorderRadius.circular(5),
         child: Image.asset(
@@ -155,156 +181,31 @@ Future<void> _signOut() async {
           width: 30,
         ),
       ),
-      const SizedBox(width: 8),
-      GestureDetector(
-        onTap: () async {
-          final selectedOption = await showMenu(
-            context: context,
-            position: RelativeRect.fromLTRB(0, 56, 0, 0), // Adjust the position as needed
-            items: [
-              PopupMenuItem<String>(
-                value: 'posts',
-                child: Row(
-                  children: [
-                    Icon(Icons.home, color: Colors.deepPurple), // Home icon
-                    const SizedBox(width: 8),
-                    Text('Posts'),
-                  ],
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'fanning',
-                child: Row(
-                  children: [
-                    Icon(Icons.favorite, color: Colors.deepPurple), // Favorite icon
-                    const SizedBox(width: 8),
-                    Text('Fanning'),
-                  ],
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'trial_info',
-                child: Row(
-                  children: [
-                    Icon(Icons.info, color: Colors.deepPurple), // Trial Info icon
-                    const SizedBox(width: 8),
-                    Text('Trial Info'),
-                  ],
-                ),
-              ),
-            ],
-          );
-
-          if (selectedOption == 'posts') {
-            // Handle the 'posts' option click
-            // You can navigate to the posts page or perform any desired action
-            _fetchUserData();
-          } else if (selectedOption == 'fanning') {
-            // Handle the 'fanning' option click
-            // You can navigate to the fanning page or perform any desired action
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FollowingPostScreen(),
-              ),
-            );
-          } else if (selectedOption == 'trial_info') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TrialInfoScreen(),
-              ),
-            );
-          }
-        },
-        child: const Text(
-          'options ▼',
-          style: TextStyle(color: Colors.deepPurple),
+      const SizedBox(width: 8), // Add spacing between the image and title
+      Text(
+        'Trials Info',
+        style: TextStyle(
+          color: Colors.deepPurple, // Set the text color to deep purple
         ),
       ),
     ],
   ),
-  backgroundColor: Colors.white,
-  automaticallyImplyLeading: false,
   actions: [
     IconButton(
-      icon: Icon(Icons.send, color: Colors.deepPurple),
+      icon: Icon(
+        Icons.add, // Plus icon
+        size: 32, // Increase icon size
+        color: Colors.deepPurple, // Set icon color to deep purple
+      ),
       onPressed: () {
+        // Navigate to the AddTrialPostScreen when the plus icon is tapped
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatHome(currentUserUid: '',),
+            builder: (context) => AddTrialPostScreen(),
           ),
         );
       },
-    ),
-    PopupMenuButton<String>(
-      onSelected: (value) async {
-        // Handle the selected option
-        if (value == 'sign out') {
-          // Handle logout option
-          await _signOut();
-        } else if (value == 'trial_setup') {
-          // Handle trial setup option
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TrialInfoScreen(),
-            ),
-          );
-        } else if (value == 'notifications') {
-          // Handle trial setup option
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => NotificationScreen(),
-            ),
-          );
-        }
-      },
-
-      itemBuilder: (context) => [
-        PopupMenuItem<String>(
-          value: 'trial_setup',
-          child: Row(
-            children: [
-              Icon(
-                Icons.info,
-                color: Colors.deepPurple,
-              ),
-              const SizedBox(width: 8),
-              Text('Trial Setup'),
-            ],
-          ),
-        ),
-          PopupMenuItem<String>(
-          value: 'notifications',
-          child: Row(
-            children: [
-              Icon(
-                Icons.notification_important,
-                color: Colors.deepPurple,
-              ),
-              const SizedBox(width: 8),
-              Text('Notifications'),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'sign out',
-          child: Row(
-            children: [
-              Icon(
-                Icons.logout,
-                color: Colors.deepPurple,
-              ),
-              const SizedBox(width: 8),
-              Text('Sign Out'),
-            ],
-          ),
-        ),
-      ],
-      icon: Icon(Icons.more_vert, color: Colors.deepPurple),
     ),
   ],
 ),
@@ -323,11 +224,8 @@ Future<void> _signOut() async {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                buildAgeFilterDropdown(),
                 buildSportFilterDropdown(),
-                buildLevelFilterDropdown(),
                 buildCountryFilterDropdown(),
-                buildRoleFilterDropdown(),
                 buildAthleteGenderFilterDropdown(),
               ],
             ),
@@ -381,33 +279,32 @@ Future<void> _signOut() async {
 }
 
       
-                                      return (postData['videoUrl'] != null) && // Ensure there's a video URL
-                         (filterAge == null || user.age == filterAge) &&
-                            (filterLevel == null ||
-                                postData['level'] == filterLevel) &&
-                            (filterSport == null ||
-                                postData['sport'] == filterSport) &&
-                            (filterCountry == null ||
-                                user.country == filterCountry) &&
-                            (filterRole == null ||
-                                postData['role'] == filterRole) &&
-                              (filterAthleteGender == null ||
-                                postData['athletegender'] == filterAthleteGender);    
-                      }).toList();
+                                     // Modify this condition to exclude posts with videoUrl
+  return postData['videoUrl'] == null &&
+      (filterLevel == null || postData['level'] == filterLevel) &&
+      (filterSport == null || postData['sport'] == filterSport) &&
+      (filterCountry == null || user.country == filterCountry) &&
+      (filterRole == null || postData['role'] == filterRole) &&
+      (filterAthleteGender == null ||
+          postData['athletegender'] == filterAthleteGender);
+}).toList();
       
-         return ListView.builder(
+        return ListView.builder(
   controller: _scrollController,
-  itemCount: filteredPosts.length + (filteredPosts.length ~/ 5),
+  itemCount: filteredPosts.length + ((filteredPosts.length ~/ 3) + 1),
   itemBuilder: (context, index) {
-    if (index % 6 == 0 && _nativeAdIsLoaded) {
+    if (index != 0 && index % 4 == 0 && _nativeAdIsLoaded) {
+      // Index is a multiple of 6 (after the first item), return an ad widget
       return Container(
         height: 300,
         width: MediaQuery.of(context).size.width,
         child: AdWidget(ad: _nativeAd!),
       );
     } else {
-      final adjustedPostIndex = index - (index ~/ 6);
-      if (adjustedPostIndex < filteredPosts.length) {
+      // Calculate the adjusted post index for non-ad items
+      final adjustedPostIndex = index - ((index ~/ 4) + 1);
+      if (adjustedPostIndex >= 0 && adjustedPostIndex < filteredPosts.length) {
+        // Return a post widget
         final postIndex = adjustedPostIndex;
         final post = filteredPosts[postIndex].data() as Map<String, dynamic>;
         final postId = filteredPosts[postIndex].id;
@@ -427,15 +324,12 @@ Future<void> _signOut() async {
           ),
         );
 
-        final level = post['level'] ?? '';
-        final role = post['role'] ?? '';
         final sport = post['sport'] ?? '';
         final caption = post['caption'] ?? '';
-        final videoUrl = post['videoUrl'] ?? '';
+        final imageUrl = post['Url'] ?? '';
         final timestampStr = post['timestamp'] as String;
         final athletegender = post['athletegender'] ?? '';
 
-        final chewieController = getChewieController(videoUrl);
 
         final timestampMillis = int.tryParse(timestampStr) ?? 0;
         final timestamp =
@@ -481,23 +375,14 @@ Future<void> _signOut() async {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 4.0),
                       child: Text(
-                          '${user.country}, $athletegender, ${user.age}'),
+                          '${user.country}, $athletegender,'),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 4.0),
                       child: Text('Sport: $sport',
                           style: const TextStyle(fontSize: 12)),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text('Role: $role',
-                          style: const TextStyle(fontSize: 12)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text('Level: $level',
-                          style: const TextStyle(fontSize: 12)),
-                    ),
+                
                     Text(formattedTimestamp),
                   ],
                 ),
@@ -506,12 +391,15 @@ Future<void> _signOut() async {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(caption),
               ),
-              AspectRatio(
-                aspectRatio: 10 / 16,
-                child: Chewie(
-                  controller: chewieController,
-                ),
-              ),
+             Padding(
+  padding: const EdgeInsets.all(8.0),
+  child: CachedNetworkImage(
+    imageUrl: post['imageUrl'],
+    placeholder: (context, url) => CircularProgressIndicator(),
+    errorWidget: (context, url, error) => Icon(Icons.error),
+  ),
+),
+
               Builder(
                 builder: (context) {
                   final likesCount = post['likesCount'] ?? 0;
@@ -552,7 +440,7 @@ Future<void> _signOut() async {
                           IconButton(
                             onPressed: () async {
                               final String textToShare =
-                                  'Check out this post: $caption\n\nVideo: $videoUrl';
+                                  'Check out this post: $caption\n\nImage: $imageUrl';
 
                               await FlutterShare.share(
                                 title: 'Shared Post',
@@ -679,70 +567,6 @@ Future<void> _signOut() async {
   }
 
 
-  ChewieController getChewieController(String videoUrl) {
-    if (!chewieControllers.containsKey(videoUrl) ||
-        chewieControllers[videoUrl] == null) {
-      final videoPlayerController = VideoPlayerController.network(videoUrl);
-      final chewieController = ChewieController(
-        videoPlayerController: videoPlayerController,
-        aspectRatio: 10 / 16,
-        autoPlay: false,
-        looping: false,
-        allowFullScreen: true,
-        autoInitialize: true,
-      );
-
-      chewieController.videoPlayerController.addListener(() {
-        if (chewieController.videoPlayerController.value.isPlaying) {
-          print('Video started playing');
-        }
-      });
-
-      chewieControllers[videoUrl] = chewieController;
-    }
-    return chewieControllers[videoUrl]!;
-  }
-    
-  List<String> ageRanges = [
-    '7 - 9',
-    '10 - 13',
-    '14 - 17',
-    '18 - 20',
-    '21 - 23',
-    '24 - 27',
-    '28 - 30',
-    '31 - 32',
-    '33 - 35',
-    '36 - 39',
-    '40 - 45',
-    '46 - 50',
-    '51 and above',
-  ]; // Add your desired age range options here
-
-  Widget buildAgeFilterDropdown() {
-    return DropdownButton<String>(
-      value: filterAge,
-      onChanged: (String? newValue) {
-        setState(() {
-          filterAge = newValue == 'Default' ? null : newValue;
-        });
-      },
-      items: [
-        DropdownMenuItem<String>(
-          value: 'Default',
-          child: Text('Default'),
-        ),
-        ...ageRanges.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-      ],
-      hint: Text('Age Range'),
-    );
-  }
-
   // Repeat the same pattern for other filter dropdowns
 
   Widget buildSportFilterDropdown() {
@@ -818,34 +642,6 @@ Future<void> _signOut() async {
     );
   }
 
-  // Repeat the same pattern for other filter dropdowns
-
-  Widget buildLevelFilterDropdown() {
-    final levels = [ 'Top Division Professional', 'League Professional/Second Division', 'League Professional/Third Division', 'League Professional/Fourth Division',
-     'Semi Professional/Fifth and Sixth Division', 'Semi Professional/Lower Leagues', 'Grassroot/Academy','Professional(Individual Sports)',
-      'Semi Professional(Individual Sports)', 'Amateur(Individual Sports)'];
-    return DropdownButton<String>(
-      value: filterLevel,
-      onChanged: (String? newValue) {
-        setState(() {
-          filterLevel = newValue == 'Default' ? null : newValue;
-        });
-      },
-      items: [
-        DropdownMenuItem<String>(
-          value: 'Default',
-          child: Text('Default'),
-        ),
-        ...levels.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-      ],
-      hint: Text('Level'),
-    );
-  }
 
    Widget buildAthleteGenderFilterDropdown() {
     final athletegenders = [ 'Male','Female',];
@@ -869,56 +665,6 @@ Future<void> _signOut() async {
         }).toList(),
       ],
       hint: Text('Athlete Gender'),
-    );
-  }
-  // Repeat the same pattern for other filter dropdowns
-
-  Widget buildRoleFilterDropdown() {
-    final roles = ['Coach/Manager','Goalkeeper(Football/Soccer)', 'Central Defender(Football/Soccer)','Right Wing Back(Football/Soccer)', 'Left Wing Back(Football/Soccer)',
-    'Defensive Midfielder(Football/Soccer)','Central Midfielder(Football/Soccer)','Attacking Midfielder(Football/Soccer)', 'Wing Forward(Football/Soccer)'
-    'Striker(Football/Soccer)', 'Point Guard(Basketball)', 'Shooting Guard(Basketball)','Center(Basketball)','Small Forward(Basketball)', 'Power Forward(Basketball)',
-     'Tennis Player(Tennis)', 'Tight Head Prop(Rugby)','Hooker(Rugby)', 'Loose Head Prop(Rugby)', 'Second Row(Rugby)', 'Blink Side Flanker(Rugby)',
-      'Open Side Flanker(Rugby)','Number 8(Rugby)', 'Scrum Half(Rugby)', 'Fly Half(Rugby)', 'Left Wing(Rugby)', 'Inside Center(Rugby)', 'Outside Center(Rugby)',
-       'Right Wing(Rugby)','Full Back(Rugby)', 'Wicketkeeper(Cricket)','Slip(Cricket)', 'Gully(Cricket)','Point(Cricket)','Cover(Cricket)', 'Third Man(Cricket)',
-        'Fine Leg(Cricket)','Mid Wicket(Cricket)', 'Mid Off(Cricket)', 'Square Leg(Cricket)', 'Captain(Cricket)', 'Outside Hitter(Volleyball)', 'Opposite(Volleyball)',
-         'Setter(Volleyball)', 'Middle Blocker(Volleyball)', 'Libero(Volleyball)', 'Defensive Specialist(Volleyball)', 'Serving Specialist(Volleyball)',
-          'Center(American Football/Gridiron)', 'Offensive Guard(American Football/Gridiron)', 'Offensive Tackle(American Football/Gridiron)',
-           'Quarterback(American Football/Gridiron)', 'Runningback(American Football/Gridiron)','Wide Receiver(American Football/Gridiron)','Tight End(American Football/Gridiron)',
-           'Defensive Tackle(American Football/Gridiron)', 'Defensive End(American Football/Gridiron)', 'Linebacker(American Football/Gridiron)',
-            'Middle Linebacker(American Football/Gridiron)', 'Outside Linebacker(American Football/Gridiron)', 'Cornerback(American Football/Gridiron)',
-             'Safety(American Football/Gridiron)', 'Nickelback and Dimeback(American Football/Gridiron)', 'Kicker(American Football/Gridiron)',
-             'Kickoff Specialist(American Football/Gridiron)', 'Punter(American Football/Gridiron)', 'Holder(American Football/Gridiron)','Long Snapper(American Football/Gridiron)',
-             'Returner(American Football/Gridiron)','Upback(American Football/Gridiron)','Gunner(American Football/Gridiron)', 'Jammer(American Football/Gridiron)',
-             'Goalkeeper(Futsal or Beach Soccer)', 'Defender(Futsal or Beach Soccer)', 'Winger(Futsal or Beach Soccer)', 'Forward(Futsal or Beach Soccer)', '100m Runner(Athletics)',
-              '200m Runner(Athletics)', '400m Runner(Athletics)','800m Runner(Athletics)', '1500m Runner(Athletics)','Marathon Runner(Athletics)', 'Relay Runner(Athletics)',
-              'Hurdle Runner(Athletics)', 'Long Jump(Athletics)', 'Triple Jump(Athletics)', 'High Jump(Athletics)', 'Pole Vault(Athletics)', 'Shot Put(Athletics)',
-             'Discus Throw(Athletics)','Javelin Throw(Athletics)','Mixed Martial Artist(Mixed Martial Arts)','Boxer(Boxing)','Pitcher(Baseball)', 'Catcher(Baseball)',
-            'First Baseman(Baseball)', 'Second Baseman(Baseball)','Third Baseman(Baseball)','Shortstop(Baseball)','Left Fielder(Baseball)','Right Fielder(Baseball)',
-          'Center Fielder(Baseball)','Middle Infielder(Baseball)','Corner Infielder(Baseball)','Batter(Baseball)','Goalkeeper(Field Hockey)','Defender(Field Hockey)',
-           'Sweeper(Field Hockey)','Midfielder(Field Hockey)','Attacker(Field Hockey)','Goalie(Ice Hockey)','Defenseman(Ice Hockey)','Wing(Ice Hockey)','Center(Ice Hockey)',
-          'Gymnast(Gymnastics)','Swimmer(Swimming)','Wrestler(Wrestling)', 'Kickboxer(Kickboxing)','Table Tennis Player(Table Tennis)','Golfer(Golf)','Snooker Player(Snooker)',
-         'Goalkeeper(Handball)','Left Back(Handball)','Right Back(Handball)','Center Back(Handball)', 'Center Forward(Handball)','Left Winger(Handball)', 'Right Winger(Handball)',
-         'Weight Lifter(Weight Lifting)', 'Referee',];
-    return DropdownButton<String>(
-      value: filterRole,
-      onChanged: (String? newValue) {
-        setState(() {
-          filterRole = newValue == 'Default' ? null : newValue;
-        });
-      },
-      items: [
-        DropdownMenuItem<String>(
-          value: 'Default',
-          child: Text('Default'),
-        ),
-        ...roles.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-      ],
-      hint: Text('Role'),
     );
   }
 
@@ -998,15 +744,6 @@ Future<void> _signOut() async {
     }
   }
 
-  void _scrollListener() {
-    final List<ChewieController> controllerValues =
-        chewieControllers.values.toList();
-    for (final controller in controllerValues) {
-      if (controller.videoPlayerController.value.isPlaying) {
-        controller.pause();
-      }
-    }
-  }
 }
 
 

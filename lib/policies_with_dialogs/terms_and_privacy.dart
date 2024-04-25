@@ -1,6 +1,6 @@
+import 'package:athlosight/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:athlosight/policies_with_dialogs/policy_dialog.dart';
-import 'package:athlosight/widgets/visible_screen.dart';
 
 class TermsAndPrivacyScreen extends StatefulWidget {
   const TermsAndPrivacyScreen({super.key});
@@ -121,7 +121,7 @@ class TermsAndPrivacyScreenState extends State<TermsAndPrivacyScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const VisibleScreen(initialIndex: 0, userProfileImageUrl: '',),
+                          builder: (context) => const HomeScreen(),
                         ),
                       );
                     }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:badges/badges.dart' as badges;
 
 class BottomNavigationBarWidget extends StatelessWidget {
   final int currentIndex;
@@ -25,15 +24,19 @@ class BottomNavigationBarWidget extends StatelessWidget {
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Home',
+          label: 'Posts',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Search',
+         BottomNavigationBarItem(
+          icon: Icon(Icons.info),
+          label: 'Trials/Camps Setup',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.add),
           label: 'Create Content',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.search),
+          label: 'Search by Username',
         ),
       
         BottomNavigationBarItem(

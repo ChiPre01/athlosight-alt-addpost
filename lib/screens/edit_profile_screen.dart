@@ -16,15 +16,16 @@ class EditProfileScreen extends StatefulWidget {
     final String currentTeam;
     final String playingCareer;
     final String styleOfPlay;
+    final String phoneNumber;
   
-
   const EditProfileScreen({
     required this.profileImageUrl,
     required this.username,
      required this.fullName,
       required this.currentTeam, 
       required this.playingCareer, 
-      required this.styleOfPlay,               
+      required this.styleOfPlay, 
+      required this.phoneNumber,               
   });
 
   @override
@@ -69,7 +70,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _currentTeamController = TextEditingController();
   late TextEditingController _playingCareerController = TextEditingController();
   late TextEditingController _styleOfPlayController = TextEditingController();
-
+  late TextEditingController _phoneNumberController = TextEditingController();
 
   File? _profileImage;
   final ImagePicker _imagePicker = ImagePicker();
@@ -82,6 +83,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _currentTeamController = TextEditingController(text: widget.currentTeam);
     _playingCareerController = TextEditingController(text: widget.playingCareer);
     _styleOfPlayController = TextEditingController(text: widget.styleOfPlay);
+    _phoneNumberController = TextEditingController(text: widget.phoneNumber);
   }
 
   @override
@@ -91,6 +93,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _currentTeamController.dispose();
     _playingCareerController.dispose();
     _styleOfPlayController.dispose();
+    _phoneNumberController.dispose();
     super.dispose();
   }
 
@@ -102,6 +105,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _currentTeamController.text = widget.currentTeam;
     _playingCareerController.text = widget.playingCareer;
     _styleOfPlayController.text = widget.styleOfPlay;
+    _phoneNumberController.text = widget.phoneNumber;
   }
 
 Future<void> _pickProfileImage() async {
@@ -197,6 +201,7 @@ Future<void> _updateLocation(String uid) async {
     final styleOfPlay = _styleOfPlayController.text.trim();
     final playingPosition = _selectedPosition;
     final gender = _selectedGender;
+    final phoneNumber = _phoneNumberController.text.trim();
 
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
@@ -218,6 +223,7 @@ Future<void> _updateLocation(String uid) async {
         'styleOfPlay': styleOfPlay,
         'playingPosition': playingPosition,
         'gender': gender,
+        'phoneNumber': phoneNumber,
       };
 
       await FirebaseFirestore.instance.collection('users').doc(uid).update(userData);
@@ -361,6 +367,14 @@ Future<void> _updateLocation(String uid) async {
               maxLines: null,
               decoration: const InputDecoration(
                 labelText: 'Style of Play',
+              ),
+            ),
+             const SizedBox(height: 16.0),
+            TextField(
+              controller: _phoneNumberController,
+              maxLines: null,
+              decoration: const InputDecoration(
+                labelText: 'Phone Number',
               ),
             ),
             const SizedBox(height: 32.0),

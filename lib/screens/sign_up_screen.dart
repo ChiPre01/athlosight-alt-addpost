@@ -1,4 +1,4 @@
-import 'package:athlosight/widgets/visible_screen.dart';
+import 'package:athlosight/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -135,7 +135,7 @@ Future<void> signUp(String email, String password) async {
       // Replace 'HomeScreen' with the actual name of your home screen
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (BuildContext context) => VisibleScreen(initialIndex: 0, userProfileImageUrl: '',)),
+        MaterialPageRoute(builder: (BuildContext context) => HomeScreen()),
       );
     } else {
       // User is signing up for the first time, navigate to the register screen

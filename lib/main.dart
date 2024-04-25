@@ -1,37 +1,36 @@
 import 'package:athlosight/firebase_options.dart';
-import 'package:athlosight/notifications/firebase_api.dart';
-import 'package:athlosight/notifications/notification_screen.dart';
-import 'package:athlosight/screens/login_screen.dart';
+import 'package:athlosight/screens/home_screen.dart';
+import 'package:athlosight/screens/welcome_screen.dart';
 import 'package:athlosight/themes/theme_provider.dart';
 import 'package:athlosight/widgets/initializer_widget.dart';
-import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+ WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    await FirebaseApi().initNotifications();
-  } catch (e) {
-    print('Error initializing Firebase: $e');
-  }
+  // Initialize Firebase, Mobile Ads, and OneSignal concurrently
+  await Future.wait([
+    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+    MobileAds.instance.initialize(),
+    SharedPreferences.getInstance(), // Initialize SharedPreferences
+  ]);
+  OneSignal.initialize("cee3614b-0a84-4f20-a505-7c200ba8a89d");
+  // Set OneSignal log level
+OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+  // Request notification permissions
+ OneSignal.Notifications.requestPermission(true);
 
-  try {
-    await MobileAds.instance.initialize();
-  } catch (e) {
-    print('Error initializing Mobile Ads: $e');
-  }
-
+  // Get SharedPreferences instance
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isFirstTimeUser = prefs.getBool('isFirstTimeUser') ?? true;
-   // If it's the first time user, set isFirstTimeUser to false
+
+  // If it's the first time user, set isFirstTimeUser to false
   if (isFirstTimeUser) {
     prefs.setBool('isFirstTimeUser', false);
   }
@@ -47,7 +46,6 @@ void main() async {
     ),
   );
 }
-
 class MyApp extends StatefulWidget {
   final bool isFirstTimeUser;
 
@@ -64,12 +62,8 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'athlosight',
       home: widget.isFirstTimeUser
-          ? LoginScreen()
-          : VisibleScreen(initialIndex: 0, userProfileImageUrl: ''),
-          navigatorKey: navigatorKey,
-          routes: {
-            '/notification_screen':(context) => const NotificationScreen(),
-          }         
+          ? WelcomeScreen()
+          : HomeScreen(),
     );
   }
 }

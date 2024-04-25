@@ -1,6 +1,6 @@
 import 'package:athlosight/policies_with_dialogs/terms_and_privacy.dart';
+import 'package:athlosight/screens/home_screen.dart';
 import 'package:athlosight/screens/register_screen.dart';
-import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -172,13 +172,13 @@ class LoginScreenState extends State<LoginScreen> {
     if (userSnapshot.exists) {
       // User is already registered, navigate to the home screen
       // Replace 'HomeScreen' with the actual name of your home screen
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (BuildContext context) => VisibleScreen(initialIndex: 0, userProfileImageUrl: '',)),
+        MaterialPageRoute(builder: (BuildContext context) => HomeScreen()),
       );
     } else {
       // User is signing up for the first time, navigate to the register screen
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (BuildContext context) => RegisterScreen()),
       );

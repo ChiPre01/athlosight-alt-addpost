@@ -210,6 +210,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     final currentTeam = userData?['currentTeam'] as String?;
     final playingCareer = userData?['playingCareer'] as String?;
     final styleOfPlay = userData?['styleOfPlay'] as String?;
+    final phoneNumber = userData?['phoneNumber'] as String?;
 
     return Scaffold(
       appBar: AppBar(
@@ -280,26 +281,30 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'playing Position: ${playingPosition ?? ''}',
+                'Playing Position: ${playingPosition ?? ''}',
                 style: const TextStyle(fontSize: 18),
               ),
               Text(
-                'gender: ${gender ?? ''}',
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'currentTeam: ${currentTeam ?? ''}',
+                'Gender: ${gender ?? ''}',
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 8),
               Text(
-                'playingCareer: ${playingCareer ?? ''}',
+                'Current Team: ${currentTeam ?? ''}',
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Playing Career: ${playingCareer ?? ''}',
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 8),
               Text(
                 'Style of Play: ${styleOfPlay ?? ''}',
+                style: const TextStyle(fontSize: 18),
+              ),
+               Text(
+                'Phone Number: ${phoneNumber ?? ''}',
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 16),
@@ -315,6 +320,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           currentTeam: currentTeam ?? '', // Default value is an empty string
           playingCareer: playingCareer ?? '', // Default value is an empty string
           styleOfPlay: styleOfPlay ?? '', // Default value is an empty string
+          phoneNumber: phoneNumber ?? '',
         ),
       ),
     );

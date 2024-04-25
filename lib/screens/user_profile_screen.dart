@@ -238,7 +238,8 @@ void _saveChatToFirestore(String otherUserId, String otherUsername, String other
         final gender = userData?['gender'] ?? '';
     final currentTeam = userData?['currentTeam'] ?? '';
     final playingCareer = userData?['playingCareer'] ?? '';
-    final styleOfPlay = userData!['styleOfPlay'] ?? '';
+    final styleOfPlay = userData?['styleOfPlay'] ?? '';
+    final phoneNumber = userData?['phoneNumber'] ?? '';
 
      
             
@@ -309,6 +310,10 @@ void _saveChatToFirestore(String otherUserId, String otherUsername, String other
                         const SizedBox(height: 8),
                       Text(
                         'Style of Play: $styleOfPlay',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                       Text(
+                        'Phone Number: $phoneNumber',
                         style: const TextStyle(fontSize: 18),
                       ),
                       const SizedBox(height: 8),

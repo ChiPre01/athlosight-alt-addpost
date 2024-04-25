@@ -32,17 +32,20 @@ class BottomNavigationBarWidget extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Home',
+          label: 'Posts',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Search',
+         BottomNavigationBarItem(
+          icon: Icon(Icons.info),
+          label: 'Trials/Camps Setup ',
         ),
-        BottomNavigationBarItem(
+         BottomNavigationBarItem(
           icon: Icon(Icons.add),
           label: 'Add Post',
         ),
-      
+        BottomNavigationBarItem(
+          icon: Icon(Icons.search),
+          label: 'Search by Username',
+        ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
           label: 'My Profile',
@@ -216,7 +219,7 @@ Future<void> _signOut() async {
                   children: [
                     Icon(Icons.info, color: Colors.deepPurple), // Trial Info icon
                     const SizedBox(width: 8),
-                    Text('Trial Info'),
+                    Text('Trials/Camps Setup'),
                   ],
                 ),
               ),
@@ -274,31 +277,10 @@ Future<void> _signOut() async {
     if (value == 'sign out') {
       // Handle logout option
       await _signOut();
-    } else if (value == 'trial_setup') {
-          // Handle trial setup option
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TrialInfoScreen(),
-            ),
-          );
-        } 
+    }
   },
 
   itemBuilder: (context) => [
-     PopupMenuItem<String>(
-          value: 'trial_setup',
-          child: Row(
-            children: [
-              Icon(
-                Icons.info,
-                color: Colors.deepPurple,
-              ),
-              const SizedBox(width: 8),
-              Text('Trial Setup'),
-            ],
-          ),
-        ),
     PopupMenuItem<String>(
       value: 'sign out',
       child: Row(
@@ -652,7 +634,7 @@ return ListView.builder(
           // Perform operations based on the selected index
           switch (index) {
             case 0:
-              // Navigate to HomeScreen
+              // Navigate to PostScreen
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -660,8 +642,8 @@ return ListView.builder(
                 ),
               );
               break;
-            case 1:
-              // Navigate to SearchScreen
+               case 1:
+              // Navigate to TrialInfoScreen
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -674,13 +656,12 @@ return ListView.builder(
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                                    builder: (context) => VisibleScreen(initialIndex: 2, userProfileImageUrl: '',),
-
+                  builder: (context) => VisibleScreen(initialIndex: 2, userProfileImageUrl: '',),
                 ),
               );
               break;
             case 3:
-              // Navigate to ChatListScreen
+              // Navigate to SearchScreen
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -689,6 +670,7 @@ return ListView.builder(
                 ),
               );
               break;
+           
             case 4:
               // Navigate to MyProfileScreen
               Navigator.push(

@@ -1,8 +1,9 @@
+import 'package:athlosight/screens/trial_info_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:athlosight/screens/add_post_screen.dart';
-import 'package:athlosight/screens/home_screen.dart';
+import 'package:athlosight/screens/posts_screen.dart';
 import 'package:athlosight/screens/my_profile_screen.dart';
 import 'package:athlosight/screens/search_screen.dart';
 import 'package:athlosight/widgets/bottom_navigation_bar.dart';
@@ -32,9 +33,10 @@ class _VisibleScreenState extends State<VisibleScreen> {
 
     // Initialize _screens here after setUnreadCount is defined
     _screens = [
-      HomeScreen(),
-      SearchScreen(),
+      PostsScreen(),
+      TrialInfoScreen(),
       AddPostScreen(),
+      SearchScreen(),
       MyProfileScreen(userProfileImageUrl: userProfileImageUrl), // Pass userProfileImageUrl
     ];
   }

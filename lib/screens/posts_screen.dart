@@ -1,4 +1,5 @@
-import 'package:athlosight/chat/chat_home.dart';
+import 'package:athlosight/chat/chat_list.dart';
+import 'package:athlosight/chat/chatsearch.dart';
 import 'package:athlosight/screens/following_post_screen.dart';
 import 'package:athlosight/screens/login_screen.dart';
 import 'package:athlosight/screens/trial_info_screen.dart';
@@ -226,17 +227,41 @@ Future<void> _signOut() async {
   backgroundColor: Colors.white,
   automaticallyImplyLeading: false,
   actions: [
-    IconButton(
-      icon: Icon(Icons.send, color: Colors.deepPurple),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatHome(currentUserUid: '',),
+   IconButton(
+  icon: Stack(
+    children: [
+      Icon(Icons.mail, color: Colors.deepPurple),
+      // Add badge here
+        Positioned(
+          right: 0,
+          child: Container(
+            padding: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.red,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+              ),
+            ),
           ),
-        );
-      },
-    ),
+        ),
+    ],
+  ),
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatSearch(),
+      ),
+    );
+  },
+),
+
     PopupMenuButton<String>(
       onSelected: (value) async {
         // Handle the selected option

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:athlosight/screens/full_screen_editprofile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as storage;
@@ -118,14 +119,14 @@ Future<void> _pickProfileImage() async {
           children: <Widget>[
             ListTile(
               leading: Icon(Icons.photo_library),
-              title: Text('Pick from Gallery'),
+              title: Text('Pick from Gallery'.tr),
               onTap: () async {
                 Navigator.pop(context, await _imagePicker.pickImage(source: ImageSource.gallery));
               },
             ),
             ListTile(
               leading: Icon(Icons.photo_camera),
-              title: Text('Take a Photo'),
+              title: Text('Take a Photo'.tr),
               onTap: () async {
                 Navigator.pop(context, await _imagePicker.pickImage(source: ImageSource.camera));
               },
@@ -232,7 +233,7 @@ Future<void> _updateLocation(String uid) async {
       await _updateCountry();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile saved')),
+         SnackBar(content: Text('Profile saved'.tr)),
       );
     } catch (error) {
       print('Error updating profile data: $error');
@@ -248,7 +249,7 @@ Future<void> _updateLocation(String uid) async {
   Widget build(BuildContext context) {
     return Scaffold(
      appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title:  Text('Edit Profile'.tr),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -299,8 +300,8 @@ Future<void> _updateLocation(String uid) async {
             const SizedBox(height: 16.0),
             TextField(
               controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
+              decoration: InputDecoration(
+                labelText: 'Username'.tr,
               ),
             ),
             const SizedBox(height: 16.0),
@@ -334,47 +335,47 @@ Future<void> _updateLocation(String uid) async {
                   child: Text(gender),
                 );
               }).toList(),
-              decoration: const InputDecoration(
-                labelText: 'Gender',
+              decoration:  InputDecoration(
+                labelText: 'Gender'.tr,
               ),
             ),
             TextField(
               controller: _fullNameController,
               maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Full Name',
+              decoration:  InputDecoration(
+                labelText: 'Full Name'.tr,
               ),
             ),
             const SizedBox(height: 16.0),
             TextField(
               controller: _currentTeamController,
               maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Current Team',
+              decoration: InputDecoration(
+                labelText: 'Current Team'.tr,
               ),
             ),
             const SizedBox(height: 16.0),
             TextField(
               controller: _playingCareerController,
               maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Playing Career',
+              decoration:  InputDecoration(
+                labelText: 'Playing Career'.tr,
               ),
             ),
             const SizedBox(height: 16.0),
             TextField(
               controller: _styleOfPlayController,
               maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Style of Play',
+              decoration:  InputDecoration(
+                labelText: 'Style of Play'.tr,
               ),
             ),
              const SizedBox(height: 16.0),
             TextField(
               controller: _phoneNumberController,
               maxLines: null,
-              decoration: const InputDecoration(
-                labelText: 'Phone Number',
+              decoration:  InputDecoration(
+                labelText: 'Phone Number'.tr,
               ),
             ),
             const SizedBox(height: 32.0),
@@ -382,10 +383,10 @@ Future<void> _updateLocation(String uid) async {
   onPressed: () {
     _saveProfile(); // Call _saveProfile directly
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Updated! Changes will be visible when users check your profile')), // Show a temporary message while processing
+       SnackBar(content: Text('Updated! Changes will be visible when users check your profile'.tr)), // Show a temporary message while processing
     );
   },
-  child: const Text('Update Profile'),
+  child:  Text('Update Profile'.tr),
 ),
 
             if (_currentCountry != null)

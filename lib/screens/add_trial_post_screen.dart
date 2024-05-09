@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -53,7 +54,7 @@ class _AddTrialPostScreenState extends State<AddTrialPostScreen> {
 
     if (_selectedSport == null || _imageFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select sport and image')),
+         SnackBar(content: Text('Please select sport and image'.tr)),
       );
       return;
     }
@@ -78,7 +79,7 @@ class _AddTrialPostScreenState extends State<AddTrialPostScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Post uploaded successfully')),
+         SnackBar(content: Text('Post uploaded successfully'.tr)),
       );
 
       // Clear the image file and caption text
@@ -104,7 +105,7 @@ class _AddTrialPostScreenState extends State<AddTrialPostScreen> {
             children: <Widget>[
               ListTile(
                 leading: Icon(Icons.photo_library),
-                title: Text('Choose from gallery'),
+                title: Text('Choose from gallery'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   _selectImageFromGallery();
@@ -112,7 +113,7 @@ class _AddTrialPostScreenState extends State<AddTrialPostScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.camera_alt),
-                title: Text('Take a photo'),
+                title: Text('Take a photo'.tr),
                 onTap: () {
                   Navigator.pop(context);
                   _takePicture();
@@ -143,7 +144,7 @@ class _AddTrialPostScreenState extends State<AddTrialPostScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              'Set up trial or camp',
+              'Set up trial or camp'.tr,
               style: TextStyle(
                 color: Colors.deepPurple,
               ),
@@ -178,7 +179,7 @@ class _AddTrialPostScreenState extends State<AddTrialPostScreen> {
               child: TextFormField(
                 controller: _captionController,
                 decoration: InputDecoration(
-                  hintText: 'Caption',
+                  hintText: 'Caption'.tr,
                 ),
               ),
             ),
@@ -191,105 +192,105 @@ class _AddTrialPostScreenState extends State<AddTrialPostScreen> {
                     _selectedSport = newValue;
                   });
                 },
-                 items: const [
+                 items:  [
                 DropdownMenuItem(
                   value: 'Football/Soccer',
-                  child: Text('Football/Soccer'),
+                  child: Text('Football/Soccer'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Basketball',
-                  child: Text('Basketball'),
+                  child: Text('Basketball'.tr),
                 ),
                  DropdownMenuItem(
                   value: 'Tennis',
-                  child: Text('Tennis'),
+                  child: Text('Tennis'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Rugby',
-                  child: Text('Rugby'),
+                  child: Text('Rugby'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Cricket',
-                  child: Text('Cricket'),
+                  child: Text('Cricket'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Volleyball',
-                  child: Text('Volleyball'),
+                  child: Text('Volleyball'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'American Football/Gridiron',
-                  child: Text('American Football/Gridiron'),
+                  child: Text('American Football/Gridiron'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Futsal',
-                  child: Text('Futsal'),
+                  child: Text('Futsal'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Athletics',
-                  child: Text('Athletics'),
+                  child: Text('Athletics'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Mixed Martial Arts',
-                  child: Text('Mixed Martial Arts'),
+                  child: Text('Mixed Martial Arts'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Boxing',
-                  child: Text('Boxing'),
+                  child: Text('Boxing'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Baseball',
-                  child: Text('Baseball'),
+                  child: Text('Baseball'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Field Hockey',
-                  child: Text('Field Hockey'),
+                  child: Text('Field Hockey'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Ice Hockey',
-                  child: Text('Ice Hockey'),
+                  child: Text('Ice Hockey'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Gymnastics',
-                  child: Text('Gymnastics'),
+                  child: Text('Gymnastics'.tr),
                 ),
                 DropdownMenuItem(
                   value: 'Swimming',
-                  child: Text('Swimming'),
+                  child: Text('Swimming'.tr),
                 ),
                  DropdownMenuItem(
                   value: 'Wrestling',
-                  child: Text('Wrestling'),
+                  child: Text('Wrestling'.tr),
                 ),
                  DropdownMenuItem(
                   value: 'Kickboxing',
-                  child: Text('Kickboxing'),
+                  child: Text('Kickboxing'.tr),
                 ),
                  DropdownMenuItem(
                   value: 'Table Tennis',
-                  child: Text('Table Tennis'),
+                  child: Text('Table Tennis'.tr),
                 ),
                  DropdownMenuItem(
                   value: 'Golf',
-                  child: Text('Golf'),
+                  child: Text('Golf'.tr),
                 ),
                   DropdownMenuItem(
                   value: 'Snooker',
-                  child: Text('Snooker'),
+                  child: Text('Snooker'.tr),
                 ),
                  DropdownMenuItem(
                   value: 'Handball',
-                  child: Text('Handball'),
+                  child: Text('Handball'.tr),
                 ),
                  DropdownMenuItem(
                   value: 'Beach Soccer',
-                  child: Text('Beach Soccer'),
+                  child: Text('Beach Soccer'.tr),
                 ),
                  DropdownMenuItem(
                   value: 'Weight Lifting',
-                  child: Text('Weight Lifting'),
+                  child: Text('Weight Lifting'.tr),
                 ),
               ],
-                              hint: Text('Select Sport'),
+                              hint: Text('Select Sport'.tr),
 
               ),
             ),

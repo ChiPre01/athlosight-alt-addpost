@@ -22,12 +22,55 @@ class BottomNavigationBarWidget extends StatelessWidget {
       unselectedItemColor: Colors.grey,
       onTap: onTap,
       items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+       BottomNavigationBarItem(
+          icon: Stack(
+            children: [
+              Icon(Icons.home),
+                Positioned(
+                  right: 0,
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '..',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
           label: 'Posts',
         ),
-         BottomNavigationBarItem(
-          icon: Icon(Icons.info),
+        BottomNavigationBarItem(
+          icon: Stack(
+            children: [
+              Icon(Icons.info),
+              // Add badge for decoration
+              Positioned(
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '..', // You can customize the badge content
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           label: 'Trials/Camps Setup',
         ),
         BottomNavigationBarItem(

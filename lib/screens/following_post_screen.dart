@@ -1,11 +1,12 @@
-import 'package:athlosight/chat/chat_home.dart';
-import 'package:athlosight/screens/sign_up_screen.dart';
+import 'package:athlosight/chat/chat_list.dart';
+import 'package:athlosight/screens/login_screen.dart';
 import 'package:athlosight/screens/trial_info_screen.dart';
 import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_share/flutter_share.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logger/logger.dart';
 import 'package:video_player/video_player.dart';
@@ -29,26 +30,69 @@ class BottomNavigationBarWidget extends StatelessWidget {
       onTap: onTap,
       selectedItemColor: Colors.deepPurple,
       unselectedItemColor: Colors.grey,
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Posts',
+          icon: Stack(
+            children: [
+              Icon(Icons.home),
+                Positioned(
+                  right: 0,
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '..',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          label: 'Posts'.tr,
         ),
-         BottomNavigationBarItem(
-          icon: Icon(Icons.info),
-          label: 'Trials/Camps Setup ',
+        BottomNavigationBarItem(
+          icon: Stack(
+            children: [
+              Icon(Icons.info),
+              // Add badge for decoration
+              Positioned(
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '..', // You can customize the badge content
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          label: 'Trials/Camps Setup'.tr,
         ),
          BottomNavigationBarItem(
           icon: Icon(Icons.add),
-          label: 'Add Post',
+          label: 'Create Content'.tr,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.search),
-          label: 'Search by Username',
+          label: 'Search by Username'.tr,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
-          label: 'My Profile',
+          label: 'My Profile'.tr,
         ),
       ],
     );
@@ -164,7 +208,7 @@ Future<void> _signOut() async {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => SignUpScreen(), // Replace SignUpScreen with your actual sign-up screen widget
+        builder: (context) => LoginScreen(), // Replace SignUpScreen with your actual sign-up screen widget
       ),
     );
   } catch (e) {
@@ -199,7 +243,7 @@ Future<void> _signOut() async {
                         children: [
                           Icon(Icons.home, color: Colors.deepPurple,), // Home icon
                           const SizedBox(width: 8),
-                          Text('Posts'),
+                          Text('Posts'.tr),
                         ],
                       ),
                     ),
@@ -209,7 +253,7 @@ Future<void> _signOut() async {
                         children: [
                           Icon(Icons.favorite, color: Colors.deepPurple,), // Favorite icon
                           const SizedBox(width: 8),
-                          Text('Fanning'),
+                          Text('Fanning'.tr),
                         ],
                       ),
                     ),
@@ -259,14 +303,37 @@ Future<void> _signOut() async {
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
          actions: [
-          IconButton(
-  icon: Icon(Icons.send, color: Colors.deepPurple),
+        
+   IconButton(
+  icon: Stack(
+    children: [
+      Icon(Icons.mail, color: Colors.deepPurple),
+      // Add badge here
+        Positioned(
+          right: 0,
+          child: Container(
+            padding: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.red,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+              ),
+            ),
+          ),
+        ),
+    ],
+  ),
   onPressed: () {
-    // Navigate to the NotificationScreen when the notification icon is tapped
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatHome(currentUserUid: '',)
+        builder: (context) => ChatList(),
       ),
     );
   },
@@ -290,7 +357,7 @@ Future<void> _signOut() async {
             color: Colors.deepPurple,
           ),
           const SizedBox(width: 8),
-          Text('sign out'),
+          Text('Sign Out'.tr),
         ],
       ),
     ),
@@ -323,7 +390,7 @@ Future<void> _signOut() async {
             child: usersList.isEmpty
                 ? Center(child: CircularProgressIndicator())
                 : followingUserIds.isEmpty
-                    ? Center(child: Text('You are not following any user.'))
+                    ? Center(child: Text('You are not following any user.'.tr))
                     : StreamBuilder<QuerySnapshot>(
                         stream: _firestore.collection('posts').where('uid', whereIn: followingUserIds).snapshots(),
                         builder: (context, snapshot) {
@@ -569,8 +636,8 @@ return ListView.builder(
                                 style: const TextStyle(fontSize: 16),
                               ),
                               const SizedBox(width: 4),
-                              const Text(
-                                'Likes',
+                               Text(
+                                'Likes'.tr,
                                 style: TextStyle(fontSize: 12),
                               ),
                             ],
@@ -598,8 +665,8 @@ return ListView.builder(
                                     style: const TextStyle(fontSize: 16),
                                   ),
                                   const SizedBox(width: 4),
-                                  const Text(
-                                    'Comments',
+                                   Text(
+                                    'Comments'.tr,
                                     style: TextStyle(fontSize: 12),
                                   ),
                                 ],
@@ -771,7 +838,7 @@ return ListView.builder(
       items: [
         DropdownMenuItem<String>(
           value: 'Default',
-          child: Text('Default'),
+          child: Text('Default'.tr),
         ),
         ...ageRanges.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -780,16 +847,16 @@ return ListView.builder(
           );
         }).toList(),
       ],
-      hint: Text('Age Range'),
+      hint: Text('Age Range'.tr),
     );
   }
 
   // Repeat the same pattern for other filter dropdowns
 
   Widget buildSportFilterDropdown() {
-     final sports = ['Football/Soccer', 'Basketball', 'Tennis', 'Rugby', 'Cricket', 'Volleyball', 'American Football/Gridiron', 'Futsal/7 or 5 a side'
-    'Athletics', 'Mixed Martial Arts','Boxing', 'Baseball', 'Field Hockey','Ice Hockey', 'Gymnastics', 'Swimming', 'Wrestling', 'Kickboxing', 'Table Tennis','Golf',
-     'Snooker', 'Handball','Weight Lifting'];
+     final sports = ['Football/Soccer'.tr, 'Basketball'.tr, 'Tennis'.tr, 'Rugby'.tr, 'Cricket'.tr, 'Volleyball'.tr, 'American Football/Gridiron'.tr, 'Futsal/7 or 5 a side'.tr,
+    'Athletics'.tr, 'Mixed Martial Arts'.tr,'Boxing'.tr, 'Baseball'.tr, 'Field Hockey'.tr,'Ice Hockey'.tr, 'Gymnastics'.tr, 'Swimming'.tr, 'Wrestling'.tr, 'Kickboxing'.tr, 
+    'Table Tennis'.tr,'Golf'.tr,'Snooker'.tr, 'Handball'.tr,'Weight Lifting'.tr];
     return DropdownButton<String>(
       value: filterSport,
       onChanged: (String? newValue) {
@@ -800,7 +867,7 @@ return ListView.builder(
       items: [
         DropdownMenuItem<String>(
           value: 'Default',
-          child: Text('Default'),
+          child: Text('Default'.tr),
         ),
         ...sports.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -846,7 +913,7 @@ return ListView.builder(
       items: [
         DropdownMenuItem<String>(
           value: 'Default',
-          child: Text('Default'),
+          child: Text('Default'.tr),
         ),
         ...countries.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -855,16 +922,16 @@ return ListView.builder(
           );
         }).toList(),
       ],
-      hint: Text('Regions'),
+      hint: Text('Regions'.tr),
     );
   }
 
   // Repeat the same pattern for other filter dropdowns
 
   Widget buildLevelFilterDropdown() {
-      final levels = [ 'Top Division Professional', 'League Professional/Second Division', 'League Professional/Third Division', 'League Professional/Fourth Division',
-     'Semi Professional/Fifth and Sixth Division', 'Semi Professional/Lower Leagues', 'Grassroot/Academy','Professional(Individual Sports)',
-      'Semi Professional(Individual Sports)', 'Amateur(Individual Sports)'];
+      final levels = [ 'Top Division Professional'.tr, 'League Professional/Second Division'.tr, 'League Professional/Third Division'.tr, 'League Professional/Fourth Division'.tr,
+     'Semi Professional/Fifth and Sixth Division'.tr, 'Semi Professional/Lower Leagues'.tr, 'Grassroot/Academy'.tr,'Professional(Individual Sports)'.tr,
+      'Semi Professional(Individual Sports)'.tr, 'Amateur(Individual Sports)'.tr];
     return DropdownButton<String>(
       value: filterLevel,
       onChanged: (String? newValue) {
@@ -875,7 +942,7 @@ return ListView.builder(
       items: [
         DropdownMenuItem<String>(
           value: 'Default',
-          child: Text('Default'),
+          child: Text('Default'.tr),
         ),
         ...levels.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -884,12 +951,12 @@ return ListView.builder(
           );
         }).toList(),
       ],
-      hint: Text('Level'),
+      hint: Text('Level'.tr),
     );
   }
 
     Widget buildAthleteGenderFilterDropdown() {
-    final athletegenders = [ 'Male','Female',];
+    final athletegenders = [ 'Male'.tr,'Female'.tr,];
     return DropdownButton<String>(
       value: filterAthleteGender,
       onChanged: (String? newValue) {
@@ -900,7 +967,7 @@ return ListView.builder(
       items: [
         DropdownMenuItem<String>(
           value: 'Default',
-          child: Text('Default'),
+          child: Text('Default'.tr),
         ),
         ...athletegenders.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -909,37 +976,37 @@ return ListView.builder(
           );
         }).toList(),
       ],
-      hint: Text('Athlete Gender'),
+      hint: Text('Athlete Gender'.tr),
     );
   }
    // Repeat the same pattern for other filter dropdowns
 
   Widget buildRoleFilterDropdown() {
-      final roles = ['Coach/Manager','Goalkeeper(Football/Soccer)', 'Central Defender(Football/Soccer)','Right Wing Back(Football/Soccer)', 'Left Wing Back(Football/Soccer)',
-    'Defensive Midfielder(Football/Soccer)','Central Midfielder(Football/Soccer)','Attacking Midfielder(Football/Soccer)', 'Wing Forward(Football/Soccer)'
-    'Striker(Football/Soccer)', 'Point Guard(Basketball)', 'Shooting Guard(Basketball)','Center(Basketball)','Small Forward(Basketball)', 'Power Forward(Basketball)',
-     'Tennis Player(Tennis)', 'Tight Head Prop(Rugby)','Hooker(Rugby)', 'Loose Head Prop(Rugby)', 'Second Row(Rugby)', 'Blink Side Flanker(Rugby)',
-      'Open Side Flanker(Rugby)','Number 8(Rugby)', 'Scrum Half(Rugby)', 'Fly Half(Rugby)', 'Left Wing(Rugby)', 'Inside Center(Rugby)', 'Outside Center(Rugby)',
-       'Right Wing(Rugby)','Full Back(Rugby)', 'Wicketkeeper(Cricket)','Slip(Cricket)', 'Gully(Cricket)','Point(Cricket)','Cover(Cricket)', 'Third Man(Cricket)',
-        'Fine Leg(Cricket)','Mid Wicket(Cricket)', 'Mid Off(Cricket)', 'Square Leg(Cricket)', 'Captain(Cricket)', 'Outside Hitter(Volleyball)', 'Opposite(Volleyball)',
-         'Setter(Volleyball)', 'Middle Blocker(Volleyball)', 'Libero(Volleyball)', 'Defensive Specialist(Volleyball)', 'Serving Specialist(Volleyball)',
-          'Center(American Football/Gridiron)', 'Offensive Guard(American Football/Gridiron)', 'Offensive Tackle(American Football/Gridiron)',
-           'Quarterback(American Football/Gridiron)', 'Runningback(American Football/Gridiron)','Wide Receiver(American Football/Gridiron)','Tight End(American Football/Gridiron)',
-           'Defensive Tackle(American Football/Gridiron)', 'Defensive End(American Football/Gridiron)', 'Linebacker(American Football/Gridiron)',
-            'Middle Linebacker(American Football/Gridiron)', 'Outside Linebacker(American Football/Gridiron)', 'Cornerback(American Football/Gridiron)',
-             'Safety(American Football/Gridiron)', 'Nickelback and Dimeback(American Football/Gridiron)', 'Kicker(American Football/Gridiron)',
-             'Kickoff Specialist(American Football/Gridiron)', 'Punter(American Football/Gridiron)', 'Holder(American Football/Gridiron)','Long Snapper(American Football/Gridiron)',
-             'Returner(American Football/Gridiron)','Upback(American Football/Gridiron)','Gunner(American Football/Gridiron)', 'Jammer(American Football/Gridiron)',
-             'Goalkeeper(Futsal or Beach Soccer)', 'Defender(Futsal or Beach Soccer)', 'Winger(Futsal or Beach Soccer)', 'Forward(Futsal or Beach Soccer)', '100m Runner(Athletics)',
-              '200m Runner(Athletics)', '400m Runner(Athletics)','800m Runner(Athletics)', '1500m Runner(Athletics)','Marathon Runner(Athletics)', 'Relay Runner(Athletics)',
-              'Hurdle Runner(Athletics)', 'Long Jump(Athletics)', 'Triple Jump(Athletics)', 'High Jump(Athletics)', 'Pole Vault(Athletics)', 'Shot Put(Athletics)',
-             'Discus Throw(Athletics)','Javelin Throw(Athletics)','Mixed Martial Artist(Mixed Martial Arts)','Boxer(Boxing)','Pitcher(Baseball)', 'Catcher(Baseball)',
-            'First Baseman(Baseball)', 'Second Baseman(Baseball)','Third Baseman(Baseball)','Shortstop(Baseball)','Left Fielder(Baseball)','Right Fielder(Baseball)',
-          'Center Fielder(Baseball)','Middle Infielder(Baseball)','Corner Infielder(Baseball)','Batter(Baseball)','Goalkeeper(Field Hockey)','Defender(Field Hockey)',
-           'Sweeper(Field Hockey)','Midfielder(Field Hockey)','Attacker(Field Hockey)','Goalie(Ice Hockey)','Defenseman(Ice Hockey)','Wing(Ice Hockey)','Center(Ice Hockey)',
-          'Gymnast(Gymnastics)','Swimmer(Swimming)','Wrestler(Wrestling)', 'Kickboxer(Kickboxing)','Table Tennis Player(Table Tennis)','Golfer(Golf)','Snooker Player(Snooker)',
-         'Goalkeeper(Handball)','Left Back(Handball)','Right Back(Handball)','Center Back(Handball)', 'Center Forward(Handball)','Left Winger(Handball)', 'Right Winger(Handball)',
-         'Weight Lifter(Weight Lifting)', 'Referee',];
+      final roles = ['Coach/Manager'.tr,'Goalkeeper(Football/Soccer)'.tr, 'Central Defender(Football/Soccer)'.tr,'Right Wing Back(Football/Soccer)'.tr, 'Left Wing Back(Football/Soccer)'.tr,
+    'Defensive Midfielder(Football/Soccer)'.tr,'Central Midfielder(Football/Soccer)'.tr,'Attacking Midfielder(Football/Soccer)'.tr, 'Wing Forward(Football/Soccer)'.tr,
+    'Striker(Football/Soccer)'.tr, 'Point Guard(Basketball)'.tr, 'Shooting Guard(Basketball)'.tr,'Center(Basketball)'.tr,'Small Forward(Basketball)'.tr, 'Power Forward(Basketball)'.tr,
+     'Tennis Player(Tennis)'.tr, 'Tight Head Prop(Rugby)'.tr,'Hooker(Rugby)'.tr, 'Loose Head Prop(Rugby)'.tr, 'Second Row(Rugby)'.tr, 'Blink Side Flanker(Rugby)'.tr,
+      'Open Side Flanker(Rugby)'.tr,'Number 8(Rugby)'.tr, 'Scrum Half(Rugby)'.tr, 'Fly Half(Rugby)'.tr, 'Left Wing(Rugby)'.tr, 'Inside Center(Rugby)'.tr, 'Outside Center(Rugby)'.tr,
+       'Right Wing(Rugby)'.tr,'Full Back(Rugby)'.tr, 'Wicketkeeper(Cricket)'.tr,'Slip(Cricket)'.tr, 'Gully(Cricket)'.tr,'Point(Cricket)'.tr,'Cover(Cricket)'.tr, 'Third Man(Cricket)'.tr,
+ 'Fine Leg(Cricket)'.tr,'Mid Wicket(Cricket)'.tr, 'Mid Off(Cricket)'.tr, 'Square Leg(Cricket)'.tr, 'Captain(Cricket)'.tr, 'Outside Hitter(Volleyball)'.tr, 'Opposite(Volleyball)'.tr,
+         'Setter(Volleyball)'.tr, 'Middle Blocker(Volleyball)'.tr, 'Libero(Volleyball)'.tr, 'Defensive Specialist(Volleyball)'.tr, 'Serving Specialist(Volleyball)'.tr,
+  'Center(American Football/Gridiron)'.tr, 'Offensive Guard(American Football/Gridiron)'.tr, 'Offensive Tackle(American Football/Gridiron)'.tr,
+'Quarterback(American Football/Gridiron)'.tr, 'Runningback(American Football/Gridiron)'.tr,'Wide Receiver(American Football/Gridiron)'.tr,'Tight End(American Football/Gridiron)'.tr,
+     'Defensive Tackle(American Football/Gridiron)'.tr, 'Defensive End(American Football/Gridiron)'.tr, 'Linebacker(American Football/Gridiron)'.tr,
+            'Middle Linebacker(American Football/Gridiron)'.tr, 'Outside Linebacker(American Football/Gridiron)'.tr, 'Cornerback(American Football/Gridiron)'.tr,
+             'Safety(American Football/Gridiron)'.tr, 'Nickelback and Dimeback(American Football/Gridiron)'.tr, 'Kicker(American Football/Gridiron)'.tr,
+   'Kickoff Specialist(American Football/Gridiron)'.tr, 'Punter(American Football/Gridiron)'.tr, 'Holder(American Football/Gridiron)'.tr,'Long Snapper(American Football/Gridiron)'.tr,
+  'Returner(American Football/Gridiron)'.tr,'Upback(American Football/Gridiron)'.tr,'Gunner(American Football/Gridiron)'.tr, 'Jammer(American Football/Gridiron)'.tr,
+ 'Goalkeeper(Futsal or Beach Soccer)'.tr, 'Defender(Futsal or Beach Soccer)'.tr, 'Winger(Futsal or Beach Soccer)'.tr, 'Forward(Futsal or Beach Soccer)'.tr, '100m Runner(Athletics)'.tr,
+  '200m Runner(Athletics)'.tr, '400m Runner(Athletics)'.tr,'800m Runner(Athletics)'.tr, '1500m Runner(Athletics)'.tr,'Marathon Runner(Athletics)'.tr, 'Relay Runner(Athletics)'.tr,
+ 'Hurdle Runner(Athletics)'.tr, 'Long Jump(Athletics)'.tr, 'Triple Jump(Athletics)'.tr, 'High Jump(Athletics)'.tr, 'Pole Vault(Athletics)'.tr, 'Shot Put(Athletics)'.tr,
+  'Discus Throw(Athletics)'.tr,'Javelin Throw(Athletics)'.tr,'Mixed Martial Artist(Mixed Martial Arts)'.tr,'Boxer(Boxing)'.tr,'Pitcher(Baseball)'.tr, 'Catcher(Baseball)'.tr,
+ 'First Baseman(Baseball)'.tr, 'Second Baseman(Baseball)'.tr,'Third Baseman(Baseball)'.tr,'Shortstop(Baseball)'.tr,'Left Fielder(Baseball)'.tr,'Right Fielder(Baseball)'.tr,
+ 'Center Fielder(Baseball)'.tr,'Middle Infielder(Baseball)'.tr,'Corner Infielder(Baseball)'.tr,'Batter(Baseball)'.tr,'Goalkeeper(Field Hockey)'.tr,'Defender(Field Hockey)'.tr,
+ 'Sweeper(Field Hockey)'.tr,'Midfielder(Field Hockey)'.tr,'Attacker(Field Hockey)'.tr,'Goalie(Ice Hockey)'.tr,'Defenseman(Ice Hockey)'.tr,'Wing(Ice Hockey)'.tr,'Center(Ice Hockey)'.tr,
+'Gymnast(Gymnastics)'.tr,'Swimmer(Swimming)'.tr,'Wrestler(Wrestling)'.tr, 'Kickboxer(Kickboxing)'.tr,'Table Tennis Player(Table Tennis)'.tr,'Golfer(Golf)'.tr,'Snooker Player(Snooker)'.tr,
+'Goalkeeper(Handball)'.tr,'Left Back(Handball)'.tr,'Right Back(Handball)'.tr,'Center Back(Handball)'.tr, 'Center Forward(Handball)'.tr,'Left Winger(Handball)'.tr, 'Right Winger(Handball)'.tr,
+   'Weight Lifter(Weight Lifting)'.tr, 'Referee'.tr,];
     return DropdownButton<String>(
       value: filterRole,
       onChanged: (String? newValue) {
@@ -950,7 +1017,7 @@ return ListView.builder(
       items: [
         DropdownMenuItem<String>(
           value: 'Default',
-          child: Text('Default'),
+          child: Text('Default'.tr),
         ),
         ...roles.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
@@ -959,7 +1026,7 @@ return ListView.builder(
           );
         }).toList(),
       ],
-      hint: Text('Role'),
+      hint: Text('Role'.tr),
     );
   }
 
@@ -1013,24 +1080,24 @@ return ListView.builder(
             });
 
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Post deleted successfully')),
+              SnackBar(content: Text('Post deleted successfully'.tr)),
             );
 
             deletedPostIds.add(postId);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('You are not authorized to delete this post')),
+              SnackBar(content: Text('You are not authorized to delete this post'.tr)),
             );
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Post does not exist')),
+            SnackBar(content: Text('Post does not exist'.tr)),
           );
         }
       } catch (e) {
         print('Error deleting post: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred while deleting the post')),
+          SnackBar(content: Text('An error occurred while deleting the post'.tr)),
         );
       }
     }

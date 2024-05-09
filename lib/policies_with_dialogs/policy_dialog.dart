@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:get/get.dart';
 
 class PolicyDialog extends StatelessWidget {
   PolicyDialog({Key? key, this.radius = 8, required this.mdFileName})
@@ -54,7 +55,7 @@ class PolicyDialog extends StatelessWidget {
                 alignment: Alignment.center,
                 height: 50,
                 width: double.infinity,
-                child: const Text("CLOSE"),
+                child:  Text('close'.tr),
               ),
             ),
           ),

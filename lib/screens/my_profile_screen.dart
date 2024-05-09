@@ -349,165 +349,170 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('posts')
-                    .where('uid', isEqualTo: _currentUser!.uid)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    final posts = snapshot.data!.docs;
+              
+             StreamBuilder<QuerySnapshot>(
+  stream: FirebaseFirestore.instance
+      .collection('posts')
+      .where('uid', isEqualTo: _currentUser!.uid)
+      .snapshots(),
+  builder: (context, snapshot) {
+    if (snapshot.hasData) {
+      final posts = snapshot.data!.docs;
 
-                 return ListView.builder(
-  shrinkWrap: true,
-  physics: const NeverScrollableScrollPhysics(),
-  itemCount: posts.length,
-  itemBuilder: (context, index) {
-    final post = posts[index].data() as Map<String, dynamic>;
-    final caption = post['caption'] as String? ?? '';
-    final videoUrl = post['videoUrl'] as String? ?? '';
-    final timestampStr = post['timestamp'] as String;
-    final timestampMillis = int.tryParse(timestampStr) ?? 0;
-    final timestamp = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
-    final formattedTimestamp =
-        DateFormat.yMMMMd().add_jm().format(timestamp);
-    final isLiked = post['isLiked'] ?? false;
-    final likesCount = post['likesCount'] ?? 0;
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: posts.length,
+        itemBuilder: (context, index) {
+          final post = posts[index].data() as Map<String, dynamic>;
+          final caption = post['caption'] as String? ?? '';
+          final videoUrl = post['videoUrl'] as String? ?? '';
+          final timestampStr = post['timestamp'] as String;
+          final timestampMillis = int.tryParse(timestampStr) ?? 0;
+          final timestamp = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
+          final formattedTimestamp =
+              DateFormat.yMMMMd().add_jm().format(timestamp);
+          final isLiked = post['isLiked'] ?? false;
+          final likesCount = post['likesCount'] ?? 0;
+          final imageUrl = post['imageUrl'] as String? ?? '';
 
-    // Build the post widget
-    Widget postWidget = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AspectRatio(
-          aspectRatio: 16 / 9,
-          child: Chewie(
-            controller: getChewieController(videoUrl),
-          ),
-        ),
-        ListTile(
-          title: Text(caption),
-          subtitle: Text(formattedTimestamp),
-          onTap: () {
-            // Handle post tap
-            // You can navigate to a detailed post screen or perform any action you want
-          },
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    // Handle like functionality
-                    _toggleLike(posts[index].id, isLiked);
-                  },
-                  icon: Icon(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: isLiked ? Colors.deepPurpleAccent : null,
+          // Build the post widget
+          Widget postWidget = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (videoUrl.isNotEmpty)
+                AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Chewie(
+                    controller: getChewieController(videoUrl),
                   ),
                 ),
-                Column(
-                  children: [
-                    Text(
-                      '$likesCount',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const Text(
-                      'Likes',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CommentScreen(
-                          postId: posts[index].id,
-                          currentUsername: username!,
-                          profileImageUrl: profileImageUrl!,
-                        ),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.comment),
-                ),
-                FutureBuilder<QuerySnapshot>(
-                  future: FirebaseFirestore.instance
-                      .collection('posts')
-                      .doc(posts[index].id)
-                      .collection('comments')
-                      .get(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState ==
-                            ConnectionState.waiting ||
-                        !snapshot.hasData) {
-                      return const SizedBox();
-                    }
-
-                    final commentsCount = snapshot.data!.docs.length;
-
-                    return Text('$commentsCount');
-                  },
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  onPressed: () async {
-                    final String textToShare =
-                        'Check out this post: $caption\n\nVideo: $videoUrl';
-
-                    // Share the post using the flutter_share package
-                    await FlutterShare.share(
-                      title: 'Shared Post',
-                      text: textToShare,
-                      chooserTitle: 'Share',
-                    );
-                  },
-                  icon: const Icon(Icons.share),
-                ),
-                const Text('Share'),
-              ],
-            ),
-            IconButton(
-              onPressed: () => _deletePost(posts[index].id),
-              icon: Icon(Icons.delete_rounded),
-            ),
-          ],
-        ),
-      ],
-    );
-
-    if (index == 0 && _nativeAdIsLoaded && _nativeAd != null) {
-      // If it's the first post, insert the native ad
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          postWidget, // Post widget
-          SizedBox(
-            height: 300, // Adjust the height as needed
-            width: MediaQuery.of(context).size.width,
-            child: AdWidget(ad: _nativeAd!), // Native ad widget
-          ),
-        ],
-      );
-    } else {
-      // Otherwise, just return the post widget
-      return postWidget;
-    }
-  },
-);
-
-
-                  }
-                  return const SizedBox(); // Return an empty container if no data
+              if (imageUrl.isNotEmpty)
+                Image.network(imageUrl),
+              ListTile(
+                title: Text(caption),
+                subtitle: Text(formattedTimestamp),
+                onTap: () {
+                  // Handle post tap
+                  // You can navigate to a detailed post screen or perform any action you want
                 },
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          // Handle like functionality
+                          _toggleLike(posts[index].id, isLiked);
+                        },
+                        icon: Icon(
+                          isLiked ? Icons.favorite : Icons.favorite_border,
+                          color: isLiked ? Colors.deepPurpleAccent : null,
+                        ),
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            '$likesCount',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const Text(
+                            'Likes',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CommentScreen(
+                                postId: posts[index].id,
+                                currentUsername: username!,
+                                profileImageUrl: profileImageUrl!,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.comment),
+                      ),
+                      FutureBuilder<QuerySnapshot>(
+                        future: FirebaseFirestore.instance
+                            .collection('posts')
+                            .doc(posts[index].id)
+                            .collection('comments')
+                            .get(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                                  ConnectionState.waiting ||
+                              !snapshot.hasData) {
+                            return const SizedBox();
+                          }
+
+                          final commentsCount =
+                              snapshot.data!.docs.length;
+
+                          return Text('$commentsCount');
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        onPressed: () async {
+                          final String textToShare =
+                              'Check out this post: $caption\n\nVideo: $videoUrl';
+
+                          // Share the post using the flutter_share package
+                          await FlutterShare.share(
+                            title: 'Shared Post',
+                            text: textToShare,
+                            chooserTitle: 'Share',
+                          );
+                        },
+                        icon: const Icon(Icons.share),
+                      ),
+                      const Text('Share'),
+                    ],
+                  ),
+                  IconButton(
+                    onPressed: () => _deletePost(posts[index].id),
+                    icon: Icon(Icons.delete_rounded),
+                  ),
+                ],
+              ),
+            ],
+          );
+
+          if (index == 0 && _nativeAdIsLoaded && _nativeAd != null) {
+            // If it's the first post, insert the native ad
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                postWidget, // Post widget
+                SizedBox(
+                  height: 300, // Adjust the height as needed
+                  width: MediaQuery.of(context).size.width,
+                  child: AdWidget(ad: _nativeAd!), // Native ad widget
+                ),
+              ],
+            );
+          } else {
+            // Otherwise, just return the post widget
+            return postWidget;
+          }
+        },
+      );
+    }
+    return const SizedBox(); // Return an empty container if no data
+  },
+),
+
             ],
           ),
         ),

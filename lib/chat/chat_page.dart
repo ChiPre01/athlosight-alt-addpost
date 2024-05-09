@@ -112,29 +112,50 @@ class _ChatPageState extends State<ChatPage> {
       },
     );
   }
+Widget _buildMessageItem(DocumentSnapshot doc) {
+  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+  // Extract message details
+  String message = data["message"];
+  String senderID = data["senderID"];
+  Timestamp timestamp = data["timestamp"];
 
-  Widget _buildMessageItem(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    //is current user
-    bool isCurrentUser =
-        data['senderID'] == FirebaseAuth.instance.currentUser!.uid;
-    //align message to right if sender is the current user, otherwise left
-    var alignment =
-        isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
+  // Determine if the message sender is the current user
+  bool isCurrentUser =
+      senderID == FirebaseAuth.instance.currentUser!.uid;
+  // Align message to right if sender is the current user, otherwise left
+  var alignment =
+      isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
 
-    return Container(
-        alignment: alignment,
-        child: Column(
-          crossAxisAlignment:
-              isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            ChatBubble(
-              message: data["message"],
-              isCurrentUser: isCurrentUser,
-            ),
-          ],
-        ));
-  }
+  return Container(
+    alignment: alignment,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // ChatBubble widget to display the message
+        ChatBubble(
+          message: message,
+          isCurrentUser: isCurrentUser,
+        ),
+        // Timestamp widget to display the message timestamp
+        Text(
+          _formatTimestamp(timestamp),
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      ],
+    ),
+  );
+}
+
+// Method to format the timestamp into a readable format
+String _formatTimestamp(Timestamp timestamp) {
+  // Convert timestamp to DateTime object
+  DateTime dateTime = timestamp.toDate();
+  // Format the DateTime object as desired
+  String formattedTime =
+      '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  return formattedTime;
+}
+
 
   Widget _buildUserInput() {
     return Padding(

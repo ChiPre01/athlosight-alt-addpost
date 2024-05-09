@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class CommentScreen extends StatefulWidget {
@@ -73,7 +74,7 @@ class _CommentScreenState extends State<CommentScreen> {
         });
       } else {
         // User is not the owner of the comment, handle accordingly
-        print('You can only delete your own comments.');
+        print('You can only delete your own comments.'.tr);
       }
     }).catchError((error) {
       // Handle the error if fetching the comment fails
@@ -85,7 +86,7 @@ class _CommentScreenState extends State<CommentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Comments'),
+        title: Text('Comments'.tr),
       ),
       body: Column(
         children: [
@@ -195,8 +196,8 @@ class _CommentScreenState extends State<CommentScreen> {
                     controller: _commentController,
                     maxLines: null, // Set maxLines to allow multiple lines
                     textInputAction: TextInputAction.newline, // Display the enter key for line breaks
-                    decoration: const InputDecoration(
-                      hintText: 'Write a comment...',
+                    decoration:  InputDecoration(
+                      hintText: 'Write a comment...'.tr,
                     ),
                   ),
                 ),

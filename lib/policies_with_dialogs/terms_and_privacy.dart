@@ -1,6 +1,7 @@
 import 'package:athlosight/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:athlosight/policies_with_dialogs/policy_dialog.dart';
+import 'package:get/get.dart';
 
 class TermsAndPrivacyScreen extends StatefulWidget {
   const TermsAndPrivacyScreen({super.key});
@@ -18,7 +19,7 @@ class TermsAndPrivacyScreenState extends State<TermsAndPrivacyScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
-        title: const Text('Terms of Use and Privacy Policy'),
+        title:  Text('termspolicy'.tr),
           leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -45,7 +46,7 @@ class TermsAndPrivacyScreenState extends State<TermsAndPrivacyScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: const Text("Click to read →"),
+                  child:  Text('clicktoread →'.tr),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -57,8 +58,8 @@ class TermsAndPrivacyScreenState extends State<TermsAndPrivacyScreen> {
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: const Text(
-                      "Terms of Use",
+                    child:  Text(
+                      'termsofuse'.tr,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.deepPurple),
@@ -72,7 +73,7 @@ class TermsAndPrivacyScreenState extends State<TermsAndPrivacyScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: const Text("Click to read →"),
+                  child: Text('clicktoread →'.tr),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -84,8 +85,8 @@ class TermsAndPrivacyScreenState extends State<TermsAndPrivacyScreen> {
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: const Text(
-                      "Privacy Policy",
+                    child:  Text(
+                      'privacypolicy'.tr,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.deepPurple),
@@ -95,8 +96,8 @@ class TermsAndPrivacyScreenState extends State<TermsAndPrivacyScreen> {
               ],
             ),
             CheckboxListTile(
-              title: const Text('I accept the Terms of Use'),
-              subtitle: const Text('Tap checkbox to accept the Terms of Use'),
+              title:  Text('acceptterms'.tr),
+              subtitle: Text('tapterms'.tr),
               value: _termsAccepted,
               onChanged: (bool? value) {
                 setState(() {
@@ -105,8 +106,8 @@ class TermsAndPrivacyScreenState extends State<TermsAndPrivacyScreen> {
               },
             ),
             CheckboxListTile(
-              title: const Text('I accept the Privacy Policy'),
-              subtitle: const Text('Tap checkbox to accept the Privacy Policy'),
+              title: Text('acceptprivacy'.tr),
+              subtitle: Text('tapprivacy'.tr),
               value: _privacyAccepted,
               onChanged: (bool? value) {
                 setState(() {
@@ -126,7 +127,7 @@ class TermsAndPrivacyScreenState extends State<TermsAndPrivacyScreen> {
                       );
                     }
                   : null,
-              child: const Text('Continue'),
+              child: Text('continue'.tr),
             ),
           ],
         ),

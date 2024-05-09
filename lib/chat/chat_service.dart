@@ -7,26 +7,38 @@ class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   //get user stream
-  Stream<List<Map<String, dynamic>>> getUsersStream(String currentUserUid) {
+   // Get users with whom the current user shares a chatroom
+  Stream<List<Map<String, dynamic>>> getUsersWithChatroom(String currentUserUid) {
     return _firestore
-        .collection("users")
-        .where("uid", isNotEqualTo: currentUserUid)
+        .collection("chat_rooms")
+        .where("members", arrayContains: currentUserUid)
         .snapshots()
-        .map((snapshot) {
-      final userDataList = snapshot.docs.map((doc) {
-        final user = doc.data();
+        .asyncMap((snapshot) async {
+      final List<String> userIds = [];
+
+      for (final doc in snapshot.docs) {
+        final members = doc["members"] as List<dynamic>;
+        userIds.addAll(members.cast<String>());
+      }
+
+      // Remove duplicates and the current user
+      userIds.remove(currentUserUid);
+      final uniqueUserIds = userIds.toSet().toList();
+
+      final usersData = await Future.wait(uniqueUserIds.map((userId) async {
+        final userDoc = await _firestore.collection("users").doc(userId).get();
         return {
-                  "uid": user["uid"], // Add user ID
-          "username": user["username"],
-          "profileImageUrl": user["profileImageUrl"], // Fetch profile image URL
+          "uid": userId,
+          "username": userDoc["username"],
+          "profileImageUrl": userDoc["profileImageUrl"],
         };
-      }).toList();
+      }));
 
-      print(userDataList); // Add this line to print the snapshot data
-
-      return userDataList;
+      return usersData;
     });
   }
+
+
 
   //send message
   Future<void> sendMessage(String receiverID, message) async {

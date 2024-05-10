@@ -118,7 +118,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       final videoPlayerController = VideoPlayerController.network(videoUrl);
       final chewieController = ChewieController(
         videoPlayerController: videoPlayerController,
-        aspectRatio: 16 / 9,
+        aspectRatio: 10 / 16,
         autoPlay: false,
         looping: false,
         allowFullScreen: true,
@@ -382,7 +382,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             children: [
               if (videoUrl.isNotEmpty)
                 AspectRatio(
-                  aspectRatio: 16 / 9,
+                  aspectRatio: 10 / 16,
                   child: Chewie(
                     controller: getChewieController(videoUrl),
                   ),

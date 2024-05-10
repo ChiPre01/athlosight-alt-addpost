@@ -1,188 +1,172 @@
-import 'package:athlosight/chat/chat_bubble.dart';
-import 'package:athlosight/chat/chat_service.dart';
+import 'package:athlosight/chat/chat_widget.dart';
+import 'package:athlosight/chat/styles.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ChatPage extends StatefulWidget {
-  final String receiverUsername;
-  final String receiverID;
-
-  ChatPage({
-    Key? key,
-    required this.receiverUsername,
-    required this.receiverID,
-  }) : super(key: key);
+  final String id;
+  final String name;
+  const ChatPage({Key? key, required this.id, required this.name}) : super(key: key);
 
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-  final TextEditingController _messageController = TextEditingController();
-
-  final ChatService _chatService = ChatService();
-
-  //for textfield focus
-  FocusNode myFocusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    //add listener to focus node
-    myFocusNode.addListener(() {
-      if (myFocusNode.hasFocus) {
-        //cause delay so that the keyboard has time to show up
-        //then the amount of remaining space will be calculated
-        //then scroll down
-        Future.delayed(
-          const Duration(milliseconds: 500),
-          () => scrollDown(),
-        );
-      }
-    });
-    //wait a bit for listview to be built, then scroll to the bottom
-    Future.delayed(
-      const Duration(milliseconds: 500),
-      () => scrollDown(),
-    );
-  }
-
-  @override
-  void dispose() {
-    myFocusNode.dispose();
-    _messageController.dispose();
-    super.dispose();
-  }
-
-  //scroll controller
-  final ScrollController _scrollController = ScrollController();
-  void scrollDown() {
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: const Duration(
-        seconds: 1,
-      ),
-      curve: Curves.fastOutSlowIn,
-    );
-  }
-
-  void sendMessage() async {
-    if (_messageController.text.isNotEmpty) {
-      await _chatService.sendMessage(
-          widget.receiverID, _messageController.text);
-      _messageController.clear();
-    }
-    scrollDown();
-  }
-
+  var roomId;
   @override
   Widget build(BuildContext context) {
-    // Accessing current user's ID
-    final String currentUserID = FirebaseAuth.instance.currentUser!.uid;
-
+    final firestore = FirebaseFirestore.instance;
     return Scaffold(
-      appBar: AppBar(title: Text(widget.receiverUsername)),
-      body: Column(
-        children: [
-          Expanded(
-            child: _buildMessageList(currentUserID),
-          ),
-          _buildUserInput(),
+      backgroundColor: Colors.indigo.shade400,
+      appBar: AppBar(
+        backgroundColor: Colors.indigo.shade400,
+        title:  Text(widget.name),
+        elevation: 0,
+        actions: [
+          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert))
         ],
       ),
-    );
-  }
-
-  Widget _buildMessageList(String currentUserID) {
-    return StreamBuilder(
-      stream: _chatService.getMessages(currentUserID, widget.receiverID),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text("Error");
-        }
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Text("Loading...");
-        }
-        return ListView(
-          controller: _scrollController,
-          children:
-              snapshot.data!.docs.map((doc) => _buildMessageItem(doc)).toList(),
-        );
-      },
-    );
-  }
-Widget _buildMessageItem(DocumentSnapshot doc) {
-  Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-  // Extract message details
-  String message = data["message"];
-  String senderID = data["senderID"];
-  Timestamp timestamp = data["timestamp"];
-
-  // Determine if the message sender is the current user
-  bool isCurrentUser =
-      senderID == FirebaseAuth.instance.currentUser!.uid;
-  // Align message to right if sender is the current user, otherwise left
-  var alignment =
-      isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
-
-  return Container(
-    alignment: alignment,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        // ChatBubble widget to display the message
-        ChatBubble(
-          message: message,
-          isCurrentUser: isCurrentUser,
-        ),
-        // Timestamp widget to display the message timestamp
-        Text(
-          _formatTimestamp(timestamp),
-          style: TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-      ],
-    ),
-  );
-}
-
-// Method to format the timestamp into a readable format
-String _formatTimestamp(Timestamp timestamp) {
-  // Convert timestamp to DateTime object
-  DateTime dateTime = timestamp.toDate();
-  // Format the DateTime object as desired
-  String formattedTime =
-      '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-  return formattedTime;
-}
-
-
-  Widget _buildUserInput() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 50.0),
-      child: Row(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Chats',
+                  style: Styles.h1(),
+                ),
+                const Spacer(),
+                StreamBuilder(
+                  stream: firestore.collection('Users').doc(widget.id).snapshots(),
+                  builder: (context,AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot) {
+                    return !snapshot.hasData?Container(): Text(
+                      'Last seen : ' + DateFormat('hh:mm a').format(snapshot.data!['date_time'].toDate()),
+                      style: Styles.h1().copyWith(
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.white70),
+                    );
+                  }
+                ),
+                const Spacer(),
+                const SizedBox(
+                  width: 50,
+                )
+              ],
+            ),
+          ),
           Expanded(
-            child: TextField(
-              controller: _messageController,
-              focusNode: myFocusNode, // Assigning focusNode here
-              decoration: InputDecoration(
-                hintText: 'Enter your message...',
-              ),
+            child: Container(
+              decoration: Styles.friendsBox(),
+              child: StreamBuilder(
+                  stream: firestore.collection('Rooms').snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasData) {
+                      if (snapshot.data!.docs.isNotEmpty) {
+                        List<QueryDocumentSnapshot?> allData = snapshot
+                            .data!.docs
+                            .where((element) =>
+                                element['users'].contains(widget.id) &&
+                                element['users'].contains(
+                                    FirebaseAuth.instance.currentUser!.uid))
+                            .toList();
+                        QueryDocumentSnapshot? data =
+                            allData.isNotEmpty ? allData.first : null;
+                        if (data != null) {
+                          roomId = data.id;
+                        }
+                        return data == null
+                            ? Container()
+                            : StreamBuilder(
+                                stream: data.reference
+                                    .collection('messages')
+                                    .orderBy('datetime', descending: true)
+                                    .snapshots(),
+                                builder: (context,
+                                    AsyncSnapshot<QuerySnapshot> snap) {
+                                  return !snap.hasData
+                                      ? Container()
+                                      : ListView.builder(
+                                          itemCount: snap.data!.docs.length,
+                                          reverse: true,
+                                          itemBuilder: (context, i) {
+                                            return ChatWidgets.messagesCard(
+                                                snap.data!.docs[i]['sent_by'] ==
+                                                    FirebaseAuth.instance.currentUser!.uid,
+                                                snap.data!.docs[i]['message'],
+                                                DateFormat('hh:mm a').format(
+                                                    snap.data!
+                                                        .docs[i]['datetime']
+                                                        .toDate()));
+                                          },
+                                        );
+                                });
+                      } else {
+                        return Center(
+                          child: Text(
+                            'No conversion found',
+                            style: Styles.h1()
+                                .copyWith(color: Colors.indigo.shade400),
+                          ),
+                        );
+                      }
+                    } else {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.indigo,
+                        ),
+                      );
+                    }
+                  }),
             ),
           ),
           Container(
-            decoration: const BoxDecoration(
-              color: Colors.deepPurple,
-              shape: BoxShape.circle,
-            ),
-            margin: const EdgeInsets.only(right: 25),
-            child: IconButton(
-              onPressed: sendMessage,
-              icon: const Icon(Icons.arrow_upward),
-              color: Colors.white,
-            ),
-          ),
+            color: Colors.white,
+            child: ChatWidgets.messageField(onSubmit: (controller) {
+              if(controller.text.toString() != ''){
+                if (roomId != null) {
+                  Map<String, dynamic> data = {
+                    'message': controller.text.trim(),
+                    'sent_by': FirebaseAuth.instance.currentUser!.uid,
+                    'datetime': DateTime.now(),
+                  };
+                  firestore.collection('Rooms').doc(roomId).update({
+                    'last_message_time': DateTime.now(),
+                    'last_message': controller.text,
+                  });
+                  firestore
+                      .collection('Rooms')
+                      .doc(roomId)
+                      .collection('messages')
+                      .add(data);
+                } else {
+                  Map<String, dynamic> data = {
+                    'message': controller.text.trim(),
+                    'sent_by': FirebaseAuth.instance.currentUser!.uid,
+                    'datetime': DateTime.now(),
+                  };
+                  firestore.collection('Rooms').add({
+                    'users': [
+                      widget.id,
+                      FirebaseAuth.instance.currentUser!.uid,
+                    ],
+                    'last_message': controller.text,
+                    'last_message_time': DateTime.now(),
+                  }).then((value) async {
+                    value.collection('messages').add(data);
+                  });
+                }
+              }
+              controller.clear();
+            }),
+          )
         ],
       ),
     );

@@ -14,7 +14,7 @@ class FullScreenVideoDialog extends StatelessWidget {
           Navigator.pop(context);
         },
         child: AspectRatio(
-          aspectRatio: 16 / 9, // Adjust the aspect ratio to fit your video dimensions
+          aspectRatio: 10 / 16, // Adjust the aspect ratio to fit your video dimensions
           child: VideoPlayerWidget(videoUrl: videoUrl),
         ),
       ),

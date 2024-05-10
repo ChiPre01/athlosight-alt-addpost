@@ -47,6 +47,7 @@ dependencies:
   flutter_markdown: ^0.6.18+3
   flutter_riverpod: ^2.5.1
   flutter_share: ^2.0.0
+  flutter_vlc_player: ^7.4.1
   fluttertoast: ^8.2.5
   font_awesome_flutter: ^10.7.0
   geocoding: ^2.1.1

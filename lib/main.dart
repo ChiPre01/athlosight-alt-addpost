@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
       locale: const Locale('en', 'US'),
       debugShowCheckedModeBanner: false,
       title: 'athlosight',
-      home: const SplashScreen(),
+      home:  const SplashScreen(),
     );
   }
 }

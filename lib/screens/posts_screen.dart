@@ -1,5 +1,4 @@
-import 'package:athlosight/chat/chat_list.dart';
-import 'package:athlosight/chat/chatsearch.dart';
+import 'package:athlosight/chat/my_home_page.dart';
 import 'package:athlosight/screens/following_post_screen.dart';
 import 'package:athlosight/screens/login_screen.dart';
 import 'package:athlosight/screens/trial_info_screen.dart';
@@ -160,7 +159,7 @@ Future<void> _signOut() async {
         onTap: () async {
           final selectedOption = await showMenu(
             context: context,
-            position: RelativeRect.fromLTRB(0, 56, 0, 0), // Adjust the position as needed
+            position: const RelativeRect.fromLTRB(0, 56, 0, 0), // Adjust the position as needed
             items: [
               PopupMenuItem<String>(
                 value: 'posts',
@@ -256,7 +255,7 @@ Future<void> _signOut() async {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatSearch(),
+        builder: (context) => MyHomePage(),
       ),
     );
   },

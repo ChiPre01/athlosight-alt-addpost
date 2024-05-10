@@ -1,4 +1,4 @@
-import 'package:athlosight/chat/chat_list.dart';
+import 'package:athlosight/chat/my_home_page.dart';
 import 'package:athlosight/screens/login_screen.dart';
 import 'package:athlosight/screens/trial_info_screen.dart';
 import 'package:athlosight/widgets/visible_screen.dart';
@@ -333,7 +333,7 @@ Future<void> _signOut() async {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatList(),
+        builder: (context) => MyHomePage(),
       ),
     );
   },

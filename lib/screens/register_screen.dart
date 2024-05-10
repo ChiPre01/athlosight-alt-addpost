@@ -248,15 +248,17 @@ class RegisterScreenState extends State<RegisterScreen> {
       _logger.e('Error saving user data: $error');
     }
   }
+  
+  Future<bool> isUsernameTaken(String username) async {
+  final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .where('username', isEqualTo: username.toLowerCase()) // Convert to lowercase
+      .get();
 
- Future<bool> isUsernameTaken(String username) async {
-    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isEqualTo: username)
-        .get();
+  return querySnapshot.docs.isNotEmpty;
+}
 
-    return querySnapshot.docs.isNotEmpty;
-  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -236,6 +236,10 @@ class LocalString extends Translations{
       'You are not authorized to delete this post': 'You are not authorized to delete this post',
       'Post does not exist': 'Post does not exist',
       'An error occurred while deleting the post': 'An error occurred while deleting the post',
+       'Caption or Add your Group Chat Name':  'Caption or Add your Group Chat Name',
+       'Group Chats': 'Group Chats',
+       'Trial Setup': 'Trial Setup',
+        'Profile': 'Profile',
     },
   };
 }

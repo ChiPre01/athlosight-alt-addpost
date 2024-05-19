@@ -14,16 +14,16 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase and Mobile Ads asynchronously
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await MobileAds.instance.initialize();
+   // Initialize Firebase, Mobile Ads, and OneSignal concurrently
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await MobileAds.instance.initialize();
 
   // Initialize OneSignal asynchronously  
    OneSignal.initialize("cee3614b-0a84-4f20-a505-7c200ba8a89d");
   // Set OneSignal log level
- await OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+  OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
   // Request notification permissions
-  await OneSignal.Notifications.requestPermission(true);
+   OneSignal.Notifications.requestPermission(true);
 
   runApp(
     ChangeNotifierProvider(

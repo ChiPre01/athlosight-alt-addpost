@@ -1,5 +1,7 @@
+import 'package:athlosight/group_chat/dashboard.dart';
 import 'package:athlosight/screens/add_trial_post_screen.dart';
 import 'package:athlosight/screens/user_profile_screen.dart';
+import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -61,7 +63,7 @@ class _TrialInfoScreenState extends State<TrialInfoScreen> {
 
 
  // Add the following line
-  final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
+  final String _adUnitId = 'ca-app-pub-1798341219433190/4386798498'; // replace with your actual ad unit ID
 
   @override
   void initState() {
@@ -168,11 +170,17 @@ class _TrialInfoScreenState extends State<TrialInfoScreen> {
   title: Row(
     children: [
       IconButton(
-        icon: Icon(Icons.arrow_back, color: Colors.deepPurple), // Back icon
-        onPressed: () {
-          Navigator.pop(context); // Navigate to the previous page
-        },
+  icon: Icon(Icons.arrow_back, color: Colors.deepPurple), // Back icon
+  onPressed: () {
+    // Navigate to the home screen and remove all routes on top of it
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VisibleScreen(initialIndex: 0, userProfileImageUrl: '',),
       ),
+    );
+  },
+),
       ClipRRect(
         borderRadius: BorderRadius.circular(5),
         child: Image.asset(
@@ -183,7 +191,7 @@ class _TrialInfoScreenState extends State<TrialInfoScreen> {
       ),
       const SizedBox(width: 8), // Add spacing between the image and title
       Text(
-        'Trials Info',
+        'Trials/Camps Info',
         style: TextStyle(
           color: Colors.deepPurple, // Set the text color to deep purple
         ),
@@ -230,6 +238,31 @@ class _TrialInfoScreenState extends State<TrialInfoScreen> {
               ],
             ),
           ),
+                      const SizedBox(height: 10),
+         ElevatedButton(
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const Dashboard(),
+      ),
+    );
+  },
+  child: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(Icons.mail), // Email icon
+      SizedBox(width: 8), // Spacer
+      Expanded(
+        child: Text(
+          'Create Group Chat Room or Search Group Chat Rooms',
+          overflow: TextOverflow.ellipsis, // Handle text overflow
+        ),
+      ),
+    ],
+  ),
+),
+
           Expanded(
             child: usersList.isEmpty
                 ? Center(child: CircularProgressIndicator())

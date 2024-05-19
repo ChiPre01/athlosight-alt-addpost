@@ -196,11 +196,29 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          automaticallyImplyLeading: false, // Remove the default back arrow
-        backgroundColor: Colors.deepPurple,
-        title: const Text('Login'),
+      appBar:AppBar(
+  automaticallyImplyLeading: false, // Remove the default back arrow
+  title: Row(
+    children: [
+      ClipRRect(
+        borderRadius: BorderRadius.circular(5),
+        child: Image.asset(
+          'assets/IMG-20230529-WA0107.jpg',
+          height: 30,
+          width: 30,
+        ),
       ),
+      const SizedBox(width: 8), // Add spacing between the image and title
+      Text(
+        'Login',
+        style: TextStyle(
+          color: Colors.deepPurple, // Set the text color to deep purple
+        ),
+      ),
+    ],
+  ),
+),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(

@@ -134,6 +134,12 @@ class _AddTrialPostScreenState extends State<AddTrialPostScreen> {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
+              IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.deepPurple), // Back icon
+        onPressed: () {
+          Navigator.pop(context); // Navigate to the previous page
+        },
+      ),
             ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: Image.asset(
@@ -179,7 +185,7 @@ class _AddTrialPostScreenState extends State<AddTrialPostScreen> {
               child: TextFormField(
                 controller: _captionController,
                 decoration: InputDecoration(
-                  hintText: 'Caption'.tr,
+                  hintText: 'Caption or Add your Group Chat Name'.tr,
                 ),
               ),
             ),

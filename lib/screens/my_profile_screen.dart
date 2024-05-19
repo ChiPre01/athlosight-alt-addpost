@@ -1,5 +1,6 @@
 import 'package:athlosight/screens/edit_profile_screen.dart';
 import 'package:athlosight/screens/full_screen_myprofile.dart';
+import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,7 +32,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
 
  // Add the following line
-  final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
+  final String _adUnitId = 'ca-app-pub-1798341219433190/4386798498'; // replace with your actual ad unit ID
   
 
   @override
@@ -218,6 +219,18 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         automaticallyImplyLeading: false, // Remove the default back arrow
         title: Row(
           children: [
+             IconButton(
+  icon: Icon(Icons.arrow_back, color: Colors.deepPurple), // Back icon
+  onPressed: () {
+    // Navigate to the home screen and remove all routes on top of it
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VisibleScreen(initialIndex: 0, userProfileImageUrl: '',),
+      ),
+    );
+  },
+),
             ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: Image.asset(

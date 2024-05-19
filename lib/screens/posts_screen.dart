@@ -1,12 +1,13 @@
-import 'package:athlosight/chat/my_home_page.dart';
+import 'package:athlosight/group_chat/dashboard.dart';
+import 'package:athlosight/screens/add_trial_post_screen.dart';
 import 'package:athlosight/screens/following_post_screen.dart';
 import 'package:athlosight/screens/login_screen.dart';
-import 'package:athlosight/screens/trial_info_screen.dart';
 import 'package:athlosight/screens/user_profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_share/flutter_share.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logger/logger.dart';
 import 'package:video_player/video_player.dart';
@@ -58,7 +59,7 @@ class _PostsScreenState extends State<PostsScreen> {
 
 
  // Add the following line
-  final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
+  final String _adUnitId = 'ca-app-pub-1798341219433190/4386798498'; // replace with your actual ad unit ID
 
 
 
@@ -167,7 +168,7 @@ Future<void> _signOut() async {
                   children: [
                     Icon(Icons.home, color: Colors.deepPurple), // Home icon
                     const SizedBox(width: 8),
-                    Text('Posts'),
+                    Text('Posts'.tr),
                   ],
                 ),
               ),
@@ -178,16 +179,6 @@ Future<void> _signOut() async {
                     Icon(Icons.favorite, color: Colors.deepPurple), // Favorite icon
                     const SizedBox(width: 8),
                     Text('Fanning'),
-                  ],
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'trial_info',
-                child: Row(
-                  children: [
-                    Icon(Icons.info, color: Colors.deepPurple), // Trial Info icon
-                    const SizedBox(width: 8),
-                    Text('Trial/Camps Setup'),
                   ],
                 ),
               ),
@@ -207,14 +198,7 @@ Future<void> _signOut() async {
                 builder: (context) => FollowingPostScreen(),
               ),
             );
-          } else if (selectedOption == 'trial_info') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TrialInfoScreen(),
-              ),
-            );
-          }
+          } 
         },
         child: const Text(
           'options ▼',
@@ -226,40 +210,7 @@ Future<void> _signOut() async {
   backgroundColor: Colors.white,
   automaticallyImplyLeading: false,
   actions: [
-   IconButton(
-  icon: Stack(
-    children: [
-      Icon(Icons.mail, color: Colors.deepPurple),
-      // Add badge here
-        Positioned(
-          right: 0,
-          child: Container(
-            padding: EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.red,
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              '.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-              ),
-            ),
-          ),
-        ),
-    ],
-  ),
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MyHomePage(),
-      ),
-    );
-  },
-),
+   
 
     PopupMenuButton<String>(
       onSelected: (value) async {
@@ -267,10 +218,53 @@ Future<void> _signOut() async {
         if (value == 'sign out') {
           // Handle logout option
           await _signOut();
+        }else if (value == 'group_chats') {
+          // Handle Group Chats option
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Dashboard(),
+            ),
+          );
+        } else if (value == 'trial_setup') {
+          // Handle Trial Setup option
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddTrialPostScreen(),
+            ),
+          );
         }
       },
 
-      itemBuilder: (context) => [    
+      itemBuilder: (context) => [
+          PopupMenuItem<String>(
+          value: 'group_chats',
+          child: Row(
+            children: [
+              const Icon(
+                Icons.mail,
+                color: Colors.deepPurple,
+              ),
+              const SizedBox(width: 8),
+              Text('Group Chats'),
+            ],
+          ),
+        ), 
+        
+         PopupMenuItem<String>(
+          value: 'trial_setup',
+          child: Row(
+            children: [
+              const Icon(
+                Icons.add,
+                color: Colors.deepPurple,
+              ),
+              const SizedBox(width: 8),
+              Text('Trial Setup'),
+            ],
+          ),
+        ),   
         PopupMenuItem<String>(
           value: 'sign out',
           child: Row(
@@ -994,5 +988,3 @@ return ListView.builder(
     }
   }
 }
-
-

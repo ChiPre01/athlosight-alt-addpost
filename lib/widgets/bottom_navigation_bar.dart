@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class BottomNavigationBarWidget extends StatelessWidget {
   final int currentIndex;
@@ -45,7 +46,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                 ),
             ],
           ),
-          label: 'Posts',
+          label: 'Posts'.tr,
         ),
         BottomNavigationBarItem(
           icon: Stack(
@@ -71,15 +72,15 @@ class BottomNavigationBarWidget extends StatelessWidget {
               ),
             ],
           ),
-          label: 'Trials/Camps Setup',
+          label: 'Trials/Camps Setup'.tr,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.add),
-          label: 'Create Content',
+          label: 'Create Content'.tr,
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.search),
-          label: 'Search by Username',
+          label: 'Search by Username'.tr,
         ),
       
         BottomNavigationBarItem(
@@ -87,7 +88,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
             backgroundImage: NetworkImage(profileImageUrl),
             radius: 15, // Adjust the radius as needed
           ),
-          label: 'Profile',
+          label: 'My Profile'.tr,
         ),
       ],
     );

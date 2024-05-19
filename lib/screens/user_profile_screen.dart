@@ -27,7 +27,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
 
  // Add the following line
-  final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
+  final String _adUnitId = 'ca-app-pub-1798341219433190/4386798498'; // replace with your actual ad unit ID
 
   @override
   void initState() {
@@ -252,9 +252,16 @@ void _saveChatToFirestore(String otherUserId, String otherUsername, String other
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-      ),
+      appBar:AppBar(
+  title: const Text('Profile'),
+  leading: IconButton(
+    icon: Icon(Icons.arrow_back, color: Colors.deepPurple),
+    onPressed: () {
+      Navigator.pop(context); // Navigate to the previous screen
+    },
+  ),
+),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

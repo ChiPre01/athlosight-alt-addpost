@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -154,6 +155,18 @@ Future<void> _uploadPost() async {
   automaticallyImplyLeading: false, // Remove the default back arrow
   title: Row(
     children: [
+       IconButton(
+  icon: Icon(Icons.arrow_back, color: Colors.deepPurple), // Back icon
+  onPressed: () {
+    // Navigate to the home screen and remove all routes on top of it
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VisibleScreen(initialIndex: 0, userProfileImageUrl: '',),
+      ),
+    );
+  },
+),
       ClipRRect(
         borderRadius: BorderRadius.circular(5),
         child: Image.asset(

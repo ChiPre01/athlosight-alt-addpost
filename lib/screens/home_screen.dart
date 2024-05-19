@@ -14,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   NativeAd? _nativeAd;
   bool _nativeAdIsLoaded = false;
 
-  final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
+  final String _adUnitId = 'ca-app-pub-1798341219433190/4386798498'; // replace with your actual ad unit ID
 
 
   @override
@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 200,
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 5),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Text('Continue to App'),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 30),
             if (_nativeAdIsLoaded && _nativeAd != null)
               Container(
                 height: 300,

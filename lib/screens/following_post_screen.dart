@@ -1,6 +1,6 @@
-import 'package:athlosight/chat/my_home_page.dart';
+import 'package:athlosight/group_chat/dashboard.dart';
+import 'package:athlosight/screens/add_trial_post_screen.dart';
 import 'package:athlosight/screens/login_screen.dart';
-import 'package:athlosight/screens/trial_info_screen.dart';
 import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -141,7 +141,7 @@ class _FollowingPostScreenState extends State<FollowingPostScreen> {
 
 
  // Add the following line
-  final String _adUnitId = 'ca-app-pub-3940256099942544/2247696110'; // replace with your actual ad unit ID
+  final String _adUnitId = 'ca-app-pub-1798341219433190/4386798498'; // replace with your actual ad unit ID
 
   List<String> followingUserIds = [];
   int _currentIndex = 0;
@@ -222,6 +222,18 @@ Future<void> _signOut() async {
       appBar:  AppBar(
         title: Row(
           children: [
+             IconButton(
+  icon: Icon(Icons.arrow_back, color: Colors.deepPurple), // Back icon
+  onPressed: () {
+    // Navigate to the home screen and remove all routes on top of it
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VisibleScreen(initialIndex: 0, userProfileImageUrl: '',),
+      ),
+    );
+  },
+),
             ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: Image.asset(
@@ -257,16 +269,7 @@ Future<void> _signOut() async {
                         ],
                       ),
                     ),
-                     PopupMenuItem<String>(
-                value: 'trial_info',
-                child: Row(
-                  children: [
-                    Icon(Icons.info, color: Colors.deepPurple), // Trial Info icon
-                    const SizedBox(width: 8),
-                    Text('Trials/Camps Setup'),
-                  ],
-                ),
-              ),
+                   
                   ],
                 );
 
@@ -283,15 +286,7 @@ Future<void> _signOut() async {
                   // Handle the 'fanning' option click
                   // You can navigate to the fanning page or perform any desired action
                                                       _fetchUserData();
-
-                }else if (selectedOption == 'trial_info') {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TrialInfoScreen(),
-              ),
-            );
-          }
+                }
               },
               child: const Text(
                 '♥ ▼',
@@ -304,50 +299,59 @@ Future<void> _signOut() async {
         automaticallyImplyLeading: false,
          actions: [
         
-   IconButton(
-  icon: Stack(
-    children: [
-      Icon(Icons.mail, color: Colors.deepPurple),
-      // Add badge here
-        Positioned(
-          right: 0,
-          child: Container(
-            padding: EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.red,
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              '.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-              ),
-            ),
-          ),
-        ),
-    ],
-  ),
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MyHomePage(),
-      ),
-    );
-  },
-),
+  
   PopupMenuButton<String>(
   onSelected: (value) async {
     // Handle the selected option
     if (value == 'sign out') {
       // Handle logout option
       await _signOut();
-    }
+    } else if (value == 'group_chats') {
+          // Handle Group Chats option
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Dashboard(),
+            ),
+          );
+        } else if (value == 'trial_setup') {
+          // Handle Trial Setup option
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddTrialPostScreen(),
+            ),
+          );
+        }
   },
 
   itemBuilder: (context) => [
+     PopupMenuItem<String>(
+          value: 'group_chats',
+          child: Row(
+            children: [
+              const Icon(
+                Icons.mail,
+                color: Colors.deepPurple,
+              ),
+              const SizedBox(width: 8),
+              Text('Group Chats'.tr),
+            ],
+          ),
+        ),
+         PopupMenuItem<String>(
+          value: 'trial_setup',
+          child: Row(
+            children: [
+              const Icon(
+                Icons.add,
+                color: Colors.deepPurple,
+              ),
+              const SizedBox(width: 8),
+              Text('Trial Setup'.tr),
+            ],
+          ),
+        ),
     PopupMenuItem<String>(
       value: 'sign out',
       child: Row(
@@ -436,8 +440,8 @@ Future<void> _signOut() async {
   }
   return false;
 }
-
-                            return (filterAge == null || user.age == filterAge) &&
+                                     return (postData['videoUrl'] != null) && // Ensure there's a video URL
+                            (filterAge == null || user.age == filterAge) &&
                                 (filterLevel == null || postData['level'] == filterLevel) &&
                                 (filterSport == null || postData['sport'] == filterSport) &&
                                 (filterCountry == null || user.country == filterCountry) &&

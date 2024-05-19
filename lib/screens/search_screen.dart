@@ -1,3 +1,4 @@
+import 'package:athlosight/widgets/visible_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -56,6 +57,18 @@ void _performSearch(String searchTerm) async {
   automaticallyImplyLeading: false, // Remove the default back arrow
   title: Row(
     children: [
+       IconButton(
+  icon: Icon(Icons.arrow_back, color: Colors.deepPurple), // Back icon
+  onPressed: () {
+    // Navigate to the home screen and remove all routes on top of it
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VisibleScreen(initialIndex: 0, userProfileImageUrl: '',),
+      ),
+    );
+  },
+),
       ClipRRect(
         borderRadius: BorderRadius.circular(5),
         child: Image.asset(
@@ -66,7 +79,7 @@ void _performSearch(String searchTerm) async {
       ),
       const SizedBox(width: 8), // Add spacing between the image and title
       Text(
-        'Search',
+        'Search by Username',
         style: TextStyle(
           color: Colors.deepPurple, // Set the text color to deep purple
         ),

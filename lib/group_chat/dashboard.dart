@@ -3,6 +3,7 @@ import 'package:athlosight/group_chat/chat_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 
 class Dashboard extends StatefulWidget {
@@ -17,6 +18,11 @@ class _DashboardState extends State<Dashboard> {
   var msgname;
   final firestore = FirebaseFirestore.instance;
   final auth = FirebaseAuth.instance;
+  
+  NativeAd? _nativeAd;
+  bool _nativeAdIsLoaded = false;
+
+  final String _adUnitId = 'ca-app-pub-1798341219433190/4386798498'; // replace with your actual ad unit ID
 
   @override
   void initState() {
@@ -26,6 +32,7 @@ class _DashboardState extends State<Dashboard> {
         setState(() {});
       }
     });
+        _loadAd();
     super.initState();
   }
 
@@ -62,55 +69,55 @@ class _DashboardState extends State<Dashboard> {
     ],
   ),
 ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white,
-        child: Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: const [
-      Icon(Icons.add),
-      SizedBox(width: 5), // Add spacing between icon and text
-      Text('Create your Chat Room'),
-    ],
+floatingActionButton: Container(
+  margin: EdgeInsets.only(bottom: 16), // Add margin to create space between the FAB and the bottom of the screen
+  child: FloatingActionButton.extended(
+    backgroundColor: Colors.white,
+    icon: Icon(Icons.add, color: Colors.deepPurple),
+    label: Text('Create your Chat Room', style: TextStyle(color: Colors.deepPurple)),
+    onPressed: () {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Create Group Chat Room'),
+            content: TextField(
+              decoration: const InputDecoration(
+                hintText: 'Enter Name',
+              ),
+              onChanged: (a) {
+                setState(() {
+                  msgname = a;
+                });
+              },
+            ),
+            actions: [
+              OutlinedButton(
+                onPressed: () {
+                  firestore
+                      .collection('Chat Rooms')
+                      .doc(msgname)
+                      .collection('messages').doc(DateTime.now().toString())
+                      .set({
+                    'sender': auth.currentUser!.email,
+                    'msg': 'Hi! , New Chat Room Created',
+                    'time' : DateFormat('hh:mm').format(DateTime.now())
+                  });
+                  firestore
+                      .collection('Chat Rooms')
+                      .doc(msgname).set({'status' : 'active'});
+                  Navigator.pop(context);
+                },
+                child: const Text('Create')
+              )
+            ],
+          );
+        }
+      );
+    }
   ),
-        onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: const Text('Create Group Chat Room'),
-                  content: TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Enter Name',
-                    ),
-                    onChanged: (a) {
-                      setState(() {
-                        msgname = a;
-                      });
-                    },
-                  ),
-                  actions: [
-                    OutlinedButton(
-                        onPressed: () {
-                          firestore
-                              .collection('Chat Rooms')
-                              .doc(msgname)
-                              .collection('messages').doc(DateTime.now().toString())
-                              .set({
-                            'sender': auth.currentUser!.email,
-                            'msg': 'Hi! , New Chat Room Created',
-                            'time' : DateFormat('hh:mm').format(DateTime.now())
-                          });
-                          firestore
-                              .collection('Chat Rooms')
-                              .doc(msgname).set({'status' : 'active'});
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Create'))
-                  ],
-                );
-              });
-        },
-      ),
+),
+
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -157,7 +164,32 @@ class _DashboardState extends State<Dashboard> {
                       : ListView.builder(
                       itemCount: snapshot.data!.docs.where((element){return element.id.contains(search);}).length,
                       itemBuilder: (context, i) {
-
+                          // Insert ad after the first item
+                            if (i == 0) {
+                              return Column(
+                                children: [
+                                  GroupCard(
+                                      title: snapshot.data!.docs
+                                        .where((element) =>
+                                            element.id.contains(search))
+                                        .toList()[i].id,
+                                    snap: snapshot.data!.docs
+                                        .where((element) =>
+                                            element.id.contains(search))
+                                        .toList()[i]
+                                        .reference
+                                        .collection('messages')
+                                        .snapshots(),
+                                  ),
+                                   if (_nativeAdIsLoaded && _nativeAd != null)
+                                    Container(
+                                      height: 300,
+                                      width: MediaQuery.of(context).size.width,
+                                      child: AdWidget(ad: _nativeAd!),
+                                    ),
+                                ]
+                              );
+                            }
                           return GroupCard(
                             title: snapshot.data!.docs.where((element){return element.id.contains(search);}).toList()[i].id,
                             snap: snapshot.data!.docs.where((element){return element.id.contains(search);}).toList()[i].reference.collection('messages').snapshots(),
@@ -168,6 +200,44 @@ class _DashboardState extends State<Dashboard> {
         ],
       ),
     );
+  }
+   /// Loads a native ad.
+  void _loadAd() {
+    setState(() {
+      _nativeAdIsLoaded = false;
+    });
+
+    _nativeAd = NativeAd(
+        adUnitId: _adUnitId,
+        factoryId: 'adFactoryExample',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            // ignore: avoid_print
+            print('$NativeAd loaded.');
+            setState(() {
+              _nativeAdIsLoaded = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            // ignore: avoid_print
+            print('$NativeAd failedToLoad: $error');
+            ad.dispose();
+          },
+          onAdClicked: (ad) {},
+          onAdImpression: (ad) {},
+          onAdClosed: (ad) {},
+          onAdOpened: (ad) {},
+          onAdWillDismissScreen: (ad) {},
+          onPaidEvent: (ad, valueMicros, precision, currencyCode) {},
+        ),
+        request: const AdRequest(),
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _nativeAd?.dispose();
+    super.dispose();
   }
 }
 

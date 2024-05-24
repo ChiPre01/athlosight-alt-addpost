@@ -240,6 +240,9 @@ class LocalString extends Translations{
        'Group Chats': 'Group Chats',
        'Trial Setup': 'Trial Setup',
         'Profile': 'Profile',
+      'Video cannot be more than 5 minutes or size cannot exceed 20MB': 'Video cannot be more than 5 minutes or size cannot exceed 20MB',
+      'Make your video highlights short and sweet,\nmaximum duration allowed at a time cannot exceed 5 minutes. \nVideos above 5 minutes cannot exceed 20MB':
+      'Make your video highlights short and sweet,\nmaximum duration allowed at a time cannot exceed 5 minutes. \nVideos above 5 minutes cannot exceed 20MB', 
     },
   };
 }

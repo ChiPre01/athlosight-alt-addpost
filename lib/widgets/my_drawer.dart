@@ -16,14 +16,6 @@ class MyDrawer extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(30),
-                    child: Image.asset(
-                      'assets/IMG-20230529-WA0107.jpg',
-                      width: 100,
-                      height: 100,
-                    ),
-                  )
                 ],
               ),
             ),

@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 200,
               ),
             ),
-            SizedBox(height: 5),
+            SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Text('Continue to App'),
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 16),
             if (_nativeAdIsLoaded && _nativeAd != null)
               Container(
                 height: 300,

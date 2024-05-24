@@ -2,7 +2,7 @@ import 'package:athlosight/screens/trial_info_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:athlosight/screens/add_post_screen.dart';
+import 'package:athlosight/post_video/add_post_screen.dart';
 import 'package:athlosight/screens/posts_screen.dart';
 import 'package:athlosight/screens/my_profile_screen.dart';
 import 'package:athlosight/screens/search_screen.dart';
